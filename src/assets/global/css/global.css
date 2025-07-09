@@ -1,0 +1,414 @@
+@charset "UTF-8";
+* {
+  margin: 0;
+  padding: 0;
+  text-decoration: none;
+  font-family: Poppins, sans-serif;
+  color: #000;
+}
+
+*, :after, :before {
+  box-sizing: border-box;
+}
+
+/*清除浮动破坏带来的塌陷问题*/
+/*清除浮动的兼容IE*/
+.clearfloat {
+  zoom: 1;
+}
+
+.clearfloat:after {
+  display: block;
+  clear: both;
+  content: "";
+  visibility: hidden;
+  height: 0;
+}
+
+.btn {
+  padding: 10px 20px;
+  border-radius: 5px;
+  white-space: nowrap;
+}
+
+.btn.default {
+  background-color: #dddddd;
+}
+
+.btn.default:active {
+  color: white;
+  background-color: gray;
+}
+
+.btn.info {
+  background-color: #0085FE;
+  color: white;
+}
+
+.btn.info:active {
+  color: white;
+  background-color: #0aaf99;
+}
+
+.btn.error {
+  background-color: #df3f3f;
+  color: white;
+}
+
+.btn.error:active {
+  color: white;
+  background-color: #c40303;
+}
+
+.btn.purple {
+  background-color: #c74ce6;
+  color: white;
+}
+
+.btn.purple:active {
+  color: white;
+  background-color: #9d24bb;
+}
+
+.btn.yellow {
+  background-color: #d6d631;
+  color: white;
+}
+
+.btn.yellow:active {
+  color: white;
+  background-color: #b8b82c;
+}
+
+.btn.hollow {
+  color: #0085FE;
+  border: 1px solid #0085FE;
+}
+
+.btn.hollow:hover {
+  color: white;
+  background-color: #0aaf99;
+}
+
+.btn.sm {
+  padding: 3px 7px;
+  font-size: 10px;
+}
+
+.btn.md {
+  padding: 8px 15px;
+  font-size: 10px;
+}
+
+.rotate-gear {
+  animation: rotate 1s linear infinite;
+  font-size: 14px;
+  color: #0085FE;
+  margin-right: 5px;
+  display: inline-block;
+}
+
+/*定义滚动条样式（高宽及背景）*/
+::-webkit-scrollbar {
+  width: 6px;
+  /* 滚动条宽度， width：对应竖滚动条的宽度  height：对应横滚动条的高度*/
+  background: transparent;
+}
+
+/*定义滚动条轨道（凹槽）样式*/
+/*定义滑块 样式*/
+::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  height: 100px;
+  /* 滚动条滑块长度 */
+  background-color: #ccc;
+}
+
+/*自定义动画类----顺时针旋转（使用这个动画的时候才设置动画执行时间）*/
+@keyframes rotate {
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+  25% {
+    -webkit-transform: rotate(90deg);
+  }
+  50% {
+    -webkit-transform: rotate(180deg);
+  }
+  75% {
+    -webkit-transform: rotate(270deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+.rotation-180 {
+  transform: rotate(180deg);
+}
+
+.rotation-90 {
+  transform: rotate(90deg);
+}
+
+.rotation-45 {
+  transform: rotate(45deg);
+}
+
+.arrow {
+  display: inline-block;
+  /*重点在这儿，盒模型，block*/
+  transition: all 0.3s;
+}
+
+.disabled {
+  pointer-events: none;
+  filter: alpha(opacity=50);
+  /*IE滤镜，透明度50%*/
+  -moz-opacity: 0.5;
+  /*Firefox私有，透明度50%*/
+  opacity: 0.5;
+  /*其他，透明度50%*/
+}
+
+.icon {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.15em;
+  fill: currentColor;
+  overflow: hidden;
+}
+
+.second-title {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.margin-10 {
+  margin: 10px;
+}
+
+.margin-20 {
+  margin: 20px;
+}
+
+.margin-t-10 {
+  margin-top: 10px;
+}
+
+.margin-t-20 {
+  margin-top: 20px;
+}
+
+.margin-t-30 {
+  margin-top: 30px;
+}
+
+.margin-b-10 {
+  margin-bottom: 10px;
+}
+
+.margin-b-20 {
+  margin-bottom: 20px;
+}
+
+.margin-l-10 {
+  margin-left: 10px;
+}
+
+.margin-l-20 {
+  margin-left: 20px;
+}
+
+.margin-r-10 {
+  margin-right: 10px;
+}
+
+.margin-r-20 {
+  margin-right: 20px;
+}
+
+.margin-tb-10 {
+  margin: 10px 0;
+}
+
+.margin-tb-20 {
+  margin: 20px 0;
+}
+
+.margin-lr-10 {
+  margin: 0 10px;
+}
+
+.margin-lr-20 {
+  margin: 0 20px;
+}
+
+.padding-10 {
+  padding: 10px;
+}
+
+.bg-color-system {
+  background-color: #0085FE;
+}
+
+.bg-color-error {
+  background-color: #df3f3f;
+}
+
+.color-system {
+  color: #0085FE;
+}
+
+.color-title-gray {
+  color: #a3a3a3;
+}
+
+.color-error {
+  color: #df3f3f;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex.row {
+  flex-direction: row;
+}
+
+.flex.col {
+  flex-direction: column;
+}
+
+.flex.align-start {
+  align-items: flex-start;
+}
+
+.flex.align-center {
+  align-items: center;
+}
+
+.flex.align-end {
+  align-items: flex-end;
+}
+
+.flex.justify-start {
+  justify-content: flex-start;
+}
+
+.flex.justify-center {
+  justify-content: center;
+}
+
+.flex.justify-between {
+  justify-content: space-between;
+}
+
+.flex.justify-around {
+  justify-content: space-around;
+}
+
+.flex.justify-end {
+  justify-content: flex-end;
+}
+
+.width-100-p {
+  width: 100%;
+}
+
+.max-width-100px {
+  max-width: 100px;
+}
+
+.lg {
+  font-size: 20px;
+}
+
+.md {
+  font-size: 16px;
+}
+
+.sm {
+  font-size: 12px;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.cur {
+  cursor: pointer;
+}
+
+.cur.def {
+  cursor: default;
+}
+
+.max-height-200 {
+  max-height: 200px;
+}
+
+.y-scroll {
+  overflow-y: scroll;
+}
+
+.border {
+  border: 1px solid #d8d8d8;
+}
+
+.radius-5 {
+  border-radius: 5px;
+}
+
+.radius-10 {
+  border-radius: 10px;
+}
+
+.grayscale {
+  -webkit-filter: grayscale(100%);
+  /* Chrome, Safari, Opera */
+  filter: grayscale(100%);
+}
+
+.table {
+  width: 100%;
+  text-align: center;
+  border-spacing: 0;
+  /**设置相邻单元格的边框间的距离**/
+  border-collapse: collapse;
+  /**边框会合并为一个单一的边框**/
+  table-layout: fixed;
+  /**固定table表格**/
+  /* 表头固定 */
+}
+
+.table td,
+.table th {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-all;
+  font-size: 14px;
+}
+
+.table tr {
+  height: 55px;
+}
+
+.table td {
+  border-style: none;
+}
+
+.table thead tr th {
+  position: sticky;
+  top: 0;
+  height: 30px;
+}
+
+.table tbody tr td:first-of-type {
+  padding: 5px;
+}

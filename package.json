@@ -1,0 +1,66 @@
+{
+  "name": "dapplink_bridge",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve --mode development",
+    "serve:prod": "vue-cli-service serve --mode production",
+    "build:prod": "vue-cli-service build --mode production",
+    "build:test": "vue-cli-service build --mode test",
+    "lint": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "@babel/plugin-transform-private-methods": "^7.23.3",
+    "@web3modal/ethers": "^4.1.1",
+    "axios": "^1.3.5",
+    "core-js": "^3.8.3",
+    "decimal.js": "^10.4.3",
+    "dotenv": "^16.4.5",
+    "element-ui": "^2.15.14",
+    "ethers": "^6.10.0",
+    "moment": "^2.30.1",
+    "sass": "^1.60.0",
+    "react": "^18.2.0",
+    "sass-loader": "^13.2.2",
+    "viem": "1.21.4",
+    "vue": "^2.6.14",
+    "vue-clipboard2": "^0.3.3",
+    "vue-i18n": "^8.28.2",
+    "vue-loading-overlay": "3.0",
+    "vue-meta": "^2.4.0",
+    "vue-router": "^3.6.5",
+    "vue-svg-transition": "^0.2.1",
+    "vue-template-compiler": "^2.6.14",
+    "vue-toastification": "^1.7.14",
+    "vuex": "^3.6.2",
+    "web3": "^1.9.0",
+    "yarn": "^1.22.21"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.16",
+    "@babel/eslint-parser": "^7.12.16",
+    "@vue/cli-plugin-babel": "~5.0.0",
+    "@vue/cli-plugin-eslint": "~5.0.0",
+    "@vue/cli-service": "~5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-plugin-vue": "^8.0.3"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/essential"
+    ],
+    "parserOptions": {
+      "parser": "@babel/eslint-parser"
+    },
+    "rules": {}
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}

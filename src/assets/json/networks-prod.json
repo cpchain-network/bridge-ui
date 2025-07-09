@@ -1,0 +1,151 @@
+[
+    
+    
+  
+    {
+        "name": "Op TestNet",
+        "chainId": 11155420,
+        "img": "optimism.svg",
+        "rpcUrl": "https://opt-sepolia.g.alchemy.com/v2/oqOPQn3wYa7a3nCf7XhM3",
+        "explorerUrl": "https://optimism-sepolia.blockscout.com",
+        "currency": "ETH",
+        "nativeTokenContract": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "usdtContract": "0x44c8EDB79089Fe99cfb79F8284D9f9CD83B8Fbc5",
+        "usdcContract": "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85",
+        "daiContract": "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
+        "wethContract": "0x4200000000000000000000000000000000000006",
+        "bridgeContract": "0x82a9e5e981dF14aB8e2D419425c0E2D2185A59c4",
+        "supportedChainsAndTokens": [
+            {
+                "name": "Sepolia TestNet",
+                "img": "eth.svg",
+                "supportedTokens": [
+                    "ETH"
+                ]
+            },
+            {
+                "name": "Holesky TestNet",
+                "img": "eth.svg",
+                "supportedTokens": [
+                    "ETH"
+                ]
+            },
+            {
+                "name": "Polygon TestNet",
+                "img": "polygon.svg",
+                "supportedTokens": [
+                    "ETH"
+                ]
+            },
+            {
+                "name": "X1 TestNet",
+                "img": "okb.png",
+                "supportedTokens": [
+                    "ETH"
+                ]
+            },
+            {
+                "name": "Manta TestNet",
+                "img": "manta.png",
+                "supportedTokens": [
+                    "ETH"
+                ]
+            },
+            {
+                "name": "Scroll TestNet",
+                "img": "scroll.svg",
+                "supportedTokens": [
+                    "ETH"
+                ]
+            },
+            {
+                "name": "Arb TestNet",
+                "img": "arbitrum.png",
+                "supportedTokens": [
+                    "ETH"
+                ]
+            },
+            {
+                "name": "Base TestNet",
+                "img": "base.svg",
+                "supportedTokens": [
+                    "ETH"
+                ]
+            }
+        ]
+    },
+   
+    {
+        "name": "Arb TestNet",
+        "chainId": 421614,
+        "img": "arbitrum.png",
+        "rpcUrl": "https://arb-sepolia.g.alchemy.com/v2/9l2eKOAZb2j9e9BwZO6NP",
+        "explorerUrl": "https://sepolia.arbiscan.io",
+        "currency": "ETH",
+        "nativeTokenContract": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "usdtContract": "0x5549AC7273FdF0615638e2Db773cA4AD8571625f",
+        "usdcContract": "0x06eFdBFf2a14a7c8E15944D1F4A48F9F95F663A4",
+        "daiContract": "0xcA77eB3fEFe3725Dc33bccB54eDEFc3D9f764f97",
+        "wethContract": "0x5300000000000000000000000000000000000004",
+        "bridgeContract": "0x82a9e5e981dF14aB8e2D419425c0E2D2185A59c4",
+        "supportedChainsAndTokens": [
+            {
+                "name": "Sepolia TestNet",
+                "img": "eth.svg",
+                "supportedTokens": [
+                    "ETH"
+                ]
+            },
+            {
+                "name": "Holesky TestNet",
+                "img": "eth.svg",
+                "supportedTokens": [
+                    "ETH"
+                ]
+            },
+            {
+                "name": "Polygon TestNet",
+                "img": "polygon.svg",
+                "supportedTokens": [
+                    "ETH"
+                ]
+            },
+            {
+                "name": "X1 TestNet",
+                "img": "okb.png",
+                "supportedTokens": [
+                    "ETH"
+                ]
+            },
+            {
+                "name": "Manta TestNet",
+                "img": "manta.png",
+                "supportedTokens": [
+                    "ETH"
+                ]
+            },
+            {
+                "name": "Op TestNet",
+                "img": "optimism.svg",
+                "supportedTokens": [
+                    "ETH"
+                ]
+            },
+            {
+                "name": "Scroll TestNet",
+                "img": "scroll.svg",
+                "supportedTokens": [
+                    "ETH"
+                ]
+            },
+            {
+                "name": "Base TestNet",
+                "img": "base.svg",
+                "supportedTokens": [
+                    "ETH"
+                ]
+            }
+        ]
+    }
+   
+]
