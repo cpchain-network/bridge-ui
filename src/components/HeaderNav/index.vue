@@ -4,10 +4,10 @@
             <div class="left-wrapper">
 
                 <div class="logo-wrapper" @click="goHome">
-                    <img src="@/assets/logo/logo_dark.png" alt="" />
+                    <img src="@/assets/imgs/bridge/logo.png" alt="" />
                 </div>
                 <div class="logo-wrapper-mobile" @click="goHome">
-                    <img src="@/assets/logo/logo-sm.png" alt="" />
+                    <img src="@/assets/imgs/bridge/logo.png"  alt="" />
                 </div>
                 <div class="menu-wrapper">
                     <div class="menu-nav">
@@ -52,7 +52,7 @@
                     </div>
                 </div>
                 <div :class="['login-info', isHome ? 'no_visiabled' : '']" v-else>
-                    <span class="ops-item pc-show" @click="goHistory()">History</span>
+                    <!-- <span class="ops-item pc-show" @click="goHistory()">History</span> -->
                     <!-- <div class="ops-item center pc-show" v-if="!currentNetwork">
                     <span class="address">Unknown Network</span>
                 </div>
@@ -374,7 +374,7 @@ export default {
 
                 img {
                     // width: 180px;
-                    height: 50px;
+                    height: 30px;
                 }
             }
 
