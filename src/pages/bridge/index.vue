@@ -82,7 +82,17 @@
                     </div>
 
                 </div>
+                <div id="gascontainer">
+                    <span>gas:</span>
 
+                    <img v-if="isloadingGas" src="@/assets/imgs/bridge/loading-gray.svg" alt="">
+                    <span v-else>
+                        {{ gasFeeEthStr }}
+
+                        ETH
+                    </span>
+
+                </div>
                 <button class="submit-btn" :disabled="!isInsufficient" @click="tab(2)">
                     <span v-if="!isInsufficient"> INSUFFICIENT FUNDS </span>
                     <span v-else>跨链</span>
@@ -142,10 +152,10 @@
             <!-- 底部按钮 -->
             <button class="modal-btn" :disabled="isProcessing" @click="bridgeMethod">
                 <img src="@/assets/imgs/bridge/loading.svg" v-if="isProcessing" alt="">
-                 <span v-else>继续</span>
+                <span v-else>继续</span>
             </button>
         </div>
-        <div class="record" v-if="false">
+        <div class="record">
             <div class="container">
 
                 <div class="cross-records">
@@ -160,22 +170,26 @@
                             <div class="th">操作</div>
                         </div>
                         <div class="records-tr" v-for="(row, idx) in records" :key="idx" :class="{ 'alt': idx % 2 === 0 }">
-                            <div class="td">{{ row.time }}</div>
+                            <div class="td">{{ row.msg_sent_timestamp | formatTime }}</div>
                             <div class="td">{{ row.token }}</div>
-                            <div class="td">{{ row.from }}</div>
-                            <div class="td">{{ row.to }}</div>
+                            <div class="td">{{ row.from_address | shortAddress }}</div>
+                            <div class="td">{{ row.to_address | shortAddress }}</div>
                             <div class="td">
-                                <span
-                                    :class="['status', row.status === '成功' ? 'success' : row.status === '失败' ? 'fail' : '']">
-                                    {{ row.status }}
+                                <span :class="['status', row.status === 1 ? 'success' : 'fail']">
+                                    {{ row.status === 1 ? "成功" : "失败" }}
                                 </span>
                             </div>
                             <div class="td">
-                                <span v-if="row.status === '失败'" class="retry-btn">重试</span>
-                                <span v-else class="detail-link">查看详情</span>
+                                <!-- <span v-if="row.status === '失败'" class="retry-btn">重试</span> -->
+                                <span class="detail-link">查看详情</span>
                             </div>
                         </div>
                     </div>
+                </div>
+                <div class="pagination">
+                    <el-pagination layout="prev, pager, next" :total="Total" :current-page.sync="pageNumber"
+                        :page-size="pageSize" @current-change="handleCurrentChange">
+                    </el-pagination>
                 </div>
             </div>
         </div>
@@ -228,19 +242,23 @@
             </div>
         </div>
 
-
+        <!-- <el-dialog title="提示" :visible.sync="Visible" width="30%" :before-close="handleClose">
+            <span>这是一段信息</span>
+           
+        </el-dialog> -->
     </div>
 </template>
 
 <script>
 import {
-    ethers, Network, JsonRpcProvider
+    ethers, Network, JsonRpcProvider, formatUnits
 } from 'ethers';
-import  axios  from 'axios';
+import axios from 'axios';
 import erc20ABI from "@/assets/abi/erc20ABI"
 import bridge from "@/assets/abi/bridgeABI"
 const bridgeABI = bridge.abi
-import { getPriceToken } from '@/api/tokenPrice'
+import { getGasFees } from '@/api/getGasFee'
+import { getBridgeRecords } from '@/api/records'
 import networks from "../../assets/json/active-networks.json"
 console.log(networks)
 import { useWeb3ModalAccount, useSwitchNetwork } from '@web3modal/ethers/vue'
@@ -279,41 +297,11 @@ export default {
     name: 'CrossRecords',
     data() {
         return {
-            records: [{
-                time: "2025/05/02 21:23",
-                token: "ETH",
-                from: "50x5AbC...d23E",
-                to: "50x5AbC...d23E",
-                status: "成功",
-            },
-            {
-                time: "2025/05/02 21:23",
-                token: "ETH",
-                from: "50x5AbC...d23E",
-                to: "50x5AbC...d23E",
-                status: "失败",
-            },
-            {
-                time: "2025/05/02 21:23",
-                token: "ETH",
-                from: "50x5AbC...d23E",
-                to: "50x5AbC...d23E",
-                status: "成功",
-            },
-            {
-                time: "2025/05/02 21:23",
-                token: "ETH",
-                from: "50x5AbC...d23E",
-                to: "50x5AbC...d23E",
-                status: "成功",
-            },
-            {
-                time: "2025/05/02 21:23",
-                token: "ETH",
-                from: "50x5AbC...d23E",
-                to: "50x5AbC...d23E",
-                status: "成功",
-            },
+            pageNumber: 1,
+            pageSize: 10,
+            Total: 0,
+            isloadingGas: true,
+            records: [
             ],
 
             showModal: false,
@@ -338,6 +326,7 @@ export default {
             dialogVisible: false,
             coinChooseVisible: false,
             selectedOption: null,
+            Visible:true,
             isLoadingBalance: false,
             position: '',
             bridgeStep: 1,
@@ -413,8 +402,8 @@ export default {
             stakingPrincipal: 0,
             rewardType: false,
             rewardTypeText: 'Withdraw Rewards',
-            minBridgeAmount: 0.001
-
+            minBridgeAmount: 0.001,
+            gasFeeEthStr: "",
         };
     },
     computed: {
@@ -465,21 +454,65 @@ export default {
             return this.stakeAmount != null && this.stakeAmount >= this.coinChoose.minBridgeAmount
         }
     },
-    created(){
-    //    this.getGas()
+    created() {
+        this.getGas()
+        this.getBridgeRecordsList()
     },
     methods: {
+        handleCurrentChange(val) {
+            this.pageNumber = val
+            this.getBridgeRecordsList()
+        },
+        //  获取gas  费用
+        async getGas() {
+            this.isloadingGas = true
+            if (chainId && chainId?.value !== this.fromChain?.chainId) {
 
-    //  获取gas  费用
-  async   getGas(){
-      var  result  = await  axios.get("https://bridge-api.testnet.cpchain.com/api/v1/bridge-gas-fee?chain_id=11155420")
-      console.log(result)
+                await this.switchNet(this.fromChain)
+                return
+            }
+            var chainId = this.fromChain.chainId
+            var result = await getGasFees(chainId)
+            // console.log(result.data.gas_fee)
+            this.weiToEth(result.data.gas_fee)
+            this.isloadingGas = false
 
-    },
-       async tab(item) {
+        },
+
+        //  获取桥历史记录
+        async getBridgeRecordsList() {
+            var result = await getBridgeRecords(
+
+                this.pageNumber,
+                this.pageSize,
+                "desc",
+                "0x155c8b4995b43c951016eb381478714b1e7f0e83"
+
+
+            )
+
+            this.records = result.data.Records
+            this.Total = result.data.Total
+            this.pageNumber = result.data.Current
+
+            console.log(result.data.Records)
+
+        },
+        weiToEth(num) {
+            const gasFeeWei = BigInt(num); // 这里模拟接口返回大整数
+
+            // 1 ETH = 10^18 wei，转换成字符串或小数用于显示
+
+
+            // 格式化成 ETH，支持任意小数位：
+            const gasFeeEthStr = formatUnits(gasFeeWei, 18); // 18 表示 wei → eth
+            this.gasFeeEthStr = gasFeeEthStr
+            // console.log(`Gas 费 ≈ ${gasFeeEthStr} ETH`);
+        },
+        async tab(item) {
             const { chainId } = useWeb3ModalAccount()
             if (chainId && chainId?.value !== this.fromChain?.chainId) {
-                
+
                 await this.switchNet(this.fromChain)
                 return
             }
@@ -632,7 +665,7 @@ export default {
             } catch (error) {
                 this.isProcessing = false;
                 console.log("bridgeEth ---- error -- ", error)
-               
+
                 if (error.info?.error?.code === 4001) {
                     this.$toast.error("User rejected the request.")
                     return;
@@ -965,6 +998,11 @@ export default {
                 this.filterCoinList(this.toChain, this.fromChain);
             },
         },
+        "fromChain.chainId": {
+            handler: function (newName, oldName) {
+                this.getGas()
+            }
+        },
 
     },
     filters: {
@@ -983,6 +1021,28 @@ export default {
 
             // 返回拼接后的结果
             return startPart + middlePart + endPart;
+        },
+        shortAddress(value) {
+            if (!value || value.length < 10) return value;
+            const prefix = value.slice(0, 6);
+            const suffix = value.slice(-4);
+            return `${prefix}...${suffix}`;
+        },
+        formatTime(value) {
+            if (!value) return '';
+
+            // 判断是否是秒级时间戳（10位）
+            const ts = value.toString().length === 10 ? value * 1000 : value;
+            const date = new Date(ts);
+
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+
+            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
         }
     },
     mounted() {
@@ -1000,6 +1060,55 @@ export default {
     button:disabled {
         cursor: not-allowed
             /* ... */
+    }
+
+    :deep(.el-pager li) {
+        background: transparent;
+        color: #fff;
+    }
+
+    :deep(.el-pagination button:disabled) {
+        background: transparent;
+    }
+
+    :deep(.el-pagination .btn-next) {
+        background: transparent;
+    }
+
+    :deep(.el-pagination .btn-prev) {
+        background: transparent !important;
+    }
+
+    :deep(.el-pager li.active) {
+        color: #00CE7A;
+    }
+
+    .pagination {
+        height: 60px;
+        padding-top: 30px;
+        text-align: right;
+    }
+
+    #gascontainer {
+
+        padding-left: 16px;
+
+        display: flex;
+        // justify-content: center;
+        align-items: center;
+
+        span {
+            font-size: 12px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: normal;
+            color: #8E8E92;
+        }
+
+        img {
+            width: 20px;
+            animation: rotate 5s linear infinite;
+        }
     }
 
     background: #121212;
@@ -1026,7 +1135,7 @@ export default {
         .content {
             padding: 16px;
             width: 448px;
-            height: 420px;
+            height: 450px;
             border-radius: 24px;
             background: #1E1E1E;
 
@@ -1724,7 +1833,7 @@ export default {
             transition: background .18s;
 
             img {
-                width:30px;
+                width: 30px;
                 animation: rotate 5s linear infinite;
             }
 
@@ -1733,6 +1842,7 @@ export default {
             }
         }
     }
+
     .modal-btn:disabled {
         cursor: not-allowed;
     }

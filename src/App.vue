@@ -5,14 +5,16 @@
       <div class="m-router-view">
         <router-view></router-view>
       </div>
-      <!-- <FooterNav></FooterNav> -->
+      <footerNav/>
+      
     </div>
   </div>
 </template>
 
 <script>
-import HeaderNav from "@/components/HeaderNav";
-import FooterNav from "@/components/FooterNav";
+import HeaderNav from "@/components/HeaderNav/navBar.vue";
+
+import  FooterNav   from "@/components/footer"
 export default {
   name: "App",
   components: {
@@ -58,7 +60,7 @@ body {
   background-position: left top;
   background-repeat: no-repeat;
   background-size: 100%; */
-  background-color: aliceblue;
+ background: #121212;
 }
 #app {
   -webkit-font-smoothing: antialiased;

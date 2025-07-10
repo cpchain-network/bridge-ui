@@ -1,0 +1,86 @@
+* {
+    margin : 0;
+    padding: 0;
+}
+
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity .5s;
+}
+
+.fade-enter,
+.fade-leave-to
+
+/* .fade-leave-active below version 2.1.8 */
+    {
+    opacity: 0;
+}
+
+.el-menu--horizontal>.el-menu-item:not(.is-disabled):focus,
+.el-menu--horizontal>.el-menu-item:not(.is-disabled):hover,
+.el-menu--horizontal>.el-submenu .el-submenu__title:hover {
+    background-color: transparent;
+    /* color: red !important; */
+}
+
+.el-menu--horizontal .el-menu .el-menu-item,
+.el-menu--horizontal .el-menu .el-submenu__title {
+    background-color: transparent;
+}
+
+.el-menu--popup {
+    background   : #1E1E1E;
+    border-radius: 16px;
+    overflow     : hidden;
+    padding      : 10px;
+}
+
+.el-submenu__title span {
+    color: #fff;
+}
+
+.el-menu.el-menu--horizontal {
+    border-bottom: 0;
+}
+
+.el-menu--horizontal .el-menu .el-menu-item {
+    color: #fff ;
+}
+
+.el-menu--horizontal>.el-submenu.is-active .el-submenu__title {
+    border-bottom: 2px solid transparent;
+    /* color:red; */
+}
+.el-menu--horizontal>.el-menu-item  {
+    color: #fff;
+}
+.el-menu--horizontal .el-menu .el-menu-item.is-active  {
+    color: #00ce7a;
+}
+
+.el-menu--horizontal>.el-menu-item.is-active  {
+    border-bottom: 2px solid transparent;
+    color: #00ce7a;
+} 
+.el-submenu__title i   {
+    color: #fff;
+}
+.el-menu--horizontal>.el-submenu .el-submenu__icon-arrow {
+    margin-left: 10px;
+    margin-top: 0px;
+}
+body {
+    /* 启用滚动，但隐藏滚动条 */
+    overflow          : auto;
+    scrollbar-width   : none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE/Edge */
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari/Edge */
+}

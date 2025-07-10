@@ -142,7 +142,7 @@
             <!-- 底部按钮 -->
             <button class="modal-btn" :disabled="isProcessing" @click="bridgeMethod">
                 <img src="@/assets/imgs/bridge/loading.svg" v-if="isProcessing" alt="">
-                 <span v-else>继续</span>
+                <span v-else>继续</span>
             </button>
         </div>
         <div class="record" v-if="false">
@@ -236,11 +236,11 @@
 import {
     ethers, Network, JsonRpcProvider
 } from 'ethers';
-import  axios  from 'axios';
+import axios from 'axios';
 import erc20ABI from "@/assets/abi/erc20ABI"
 import bridge from "@/assets/abi/bridgeABI"
 const bridgeABI = bridge.abi
-import { getPriceToken } from '@/api/tokenPrice'
+import { getGasFees } from '@/api/getGasFee'
 import networks from "../../assets/json/active-networks.json"
 console.log(networks)
 import { useWeb3ModalAccount, useSwitchNetwork } from '@web3modal/ethers/vue'
@@ -465,21 +465,27 @@ export default {
             return this.stakeAmount != null && this.stakeAmount >= this.coinChoose.minBridgeAmount
         }
     },
-    created(){
-    //    this.getGas()
+    created() {
+        //    this.getGas()
     },
     methods: {
 
-    //  获取gas  费用
-  async   getGas(){
-      var  result  = await  axios.get("https://bridge-api.testnet.cpchain.com/api/v1/bridge-gas-fee?chain_id=11155420")
-      console.log(result)
+        //  获取gas  费用
+        async getGas() {
+            if (chainId && chainId?.value !== this.fromChain?.chainId) {
 
-    },
-       async tab(item) {
+                await this.switchNet(this.fromChain)
+                return
+            }
+            var chainId = this.fromChain.chainId
+            var result = await getGasFees(11155420)
+            console.log(result)
+
+        },
+        async tab(item) {
             const { chainId } = useWeb3ModalAccount()
             if (chainId && chainId?.value !== this.fromChain?.chainId) {
-                
+
                 await this.switchNet(this.fromChain)
                 return
             }
@@ -1721,7 +1727,7 @@ export default {
             transition: background .18s;
 
             img {
-                width:30px;
+                width: 30px;
                 animation: rotate 5s linear infinite;
             }
 
@@ -1730,6 +1736,7 @@ export default {
             }
         }
     }
+
     .modal-btn:disabled {
         cursor: not-allowed;
     }

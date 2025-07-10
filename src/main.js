@@ -18,6 +18,8 @@ import 'element-ui/lib/theme-chalk/index.css';
 import moment from 'moment'
 import { getNetworks } from './utils/networks.js';
 Vue.prototype.$moment = moment
+import i18n from './languages'; // 你的 index.js 导出的 i18n 实例
+import  "./reset.css"
 Vue.config.productionTip = false
 Vue.use(vuex)
 // Vue.use(VueI18n)
@@ -75,7 +77,7 @@ router.beforeEach((to, from, next) => {
 // });
 
 let vueThis = new Vue({
-  // i18n,
+   i18n,
   store,
   router,
   metaInfo () {
