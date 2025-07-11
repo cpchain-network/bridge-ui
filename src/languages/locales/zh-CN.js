@@ -4,6 +4,38 @@ export default {
     titel: "链接钱包",
     exit: "退出！"
   },
+  bridge:{
+    title:"随随时随地轻轻松松跨链",
+    Available:"可用",
+    handlingfee:"手续费",
+    Insufficient:"资金不足",
+    sure1:"跨链",
+    record:{
+      title :"跨链记录",
+      name1:"时间",
+      coin:"代币",
+      send:"发出方",
+      receive:"接收方",
+      state:{
+        name:"状态",
+        error:"失败",
+        success:"成功",
+        opt:"操作"
+      },
+      opt:"查看详情"
+
+    },
+    sureTitle:"确认信息",
+    from :"从",
+    to:"到",
+    Crosschain:"跨链",
+    get:"获得",
+    cross:"通过",
+    crossName:"原生跨链",
+    time:"转账时间",
+    fee:"费用",
+    continues:"继续"
+  },
   notice: {
     title: "功能开发中",
     subtitle: "我们正在全力以赴开发新功能，力求为您带来更优质的体验",

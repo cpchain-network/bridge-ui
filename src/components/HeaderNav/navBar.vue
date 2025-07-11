@@ -1,78 +1,141 @@
 <template>
-  <div class="header">
-    <div class="content">
-      <el-row>
-        <el-col :xs="3" :sm="4" :md="5" :lg="9" :xl="11">
-          <div class="gridContent">
-            <img src="@/assets/imgs/cpChain.png" alt="">
-          </div>
-        </el-col>
-        <el-col :xs="21" :sm="20" :md="19" :lg="15" :xl="13">
-          <div class="gridContent2">
+  <div>
+    <div class="header">
+      <div class="content">
+        <el-row>
+          <el-col :xs="3" :sm="4" :md="5" :lg="9" :xl="11">
+            <div class="gridContent">
+              <img src="@/assets/imgs/cpChain.png" alt="">
+            </div>
+          </el-col>
+          <el-col :xs="21" :sm="20" :md="19" :lg="15" :xl="13">
+            <div class="gridContent2">
 
-            <div class="menu">
+              <div class="menu">
 
-              <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" @select="handleSelect"
-                style="background: transparent;" :ellipsis="false">
-                <el-submenu index="1">
-                  <span slot="title">{{ $t('navbar.meun1.title') }}</span>
-                  <el-menu-item index="1-1">{{ $t('navbar.meun1.menu.name1') }}</el-menu-item>
-                  <el-menu-item index="1-2">{{ $t('navbar.meun1.menu.name2') }}</el-menu-item>
-                </el-submenu>
+                <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" @select="handleSelect"
+                  style="background: transparent;" :ellipsis="false">
+                  <el-submenu index="1">
+                    <span slot="title">{{ $t('navbar.meun1.title') }}</span>
+                    <el-menu-item index="1-1">{{ $t('navbar.meun1.menu.name1') }}</el-menu-item>
+                    <el-menu-item index="1-2">{{ $t('navbar.meun1.menu.name2') }}</el-menu-item>
+                  </el-submenu>
 
-                <el-submenu index="2">
-                  <span slot="title">{{ $t('navbar.meun2.title') }}</span>
-                  <el-menu-item index="2-1">{{ $t('navbar.meun2.menu.name1') }}</el-menu-item>
-                  <el-menu-item index="2-2">{{ $t('navbar.meun2.menu.name2') }}</el-menu-item>
-                  <el-menu-item index="2-3">{{ $t('navbar.meun2.menu.name3') }}</el-menu-item>
-                  <el-menu-item index="2-4">{{ $t('navbar.meun2.menu.name4') }}</el-menu-item>
-                </el-submenu>
+                  <el-submenu index="2">
+                    <span slot="title">{{ $t('navbar.meun2.title') }}</span>
+                    <el-menu-item index="2-1">{{ $t('navbar.meun2.menu.name1') }}</el-menu-item>
+                    <el-menu-item index="2-2">{{ $t('navbar.meun2.menu.name2') }}</el-menu-item>
+                    <el-menu-item index="2-3">{{ $t('navbar.meun2.menu.name3') }}</el-menu-item>
+                    <el-menu-item index="2-4">{{ $t('navbar.meun2.menu.name4') }}</el-menu-item>
+                  </el-submenu>
 
-                <el-submenu index="3">
-                  <span slot="title">{{ $t('navbar.meun3.title') }}</span>
-                  <el-menu-item index="3-1">{{ $t('navbar.meun3.menu.name1') }}</el-menu-item>
-                  <el-menu-item index="3-2">{{ $t('navbar.meun3.menu.name2') }}</el-menu-item>
-                </el-submenu>
+                  <el-submenu index="3">
+                    <span slot="title">{{ $t('navbar.meun3.title') }}</span>
+                    <el-menu-item index="3-1">{{ $t('navbar.meun3.menu.name1') }}</el-menu-item>
+                    <el-menu-item index="3-2">{{ $t('navbar.meun3.menu.name2') }}</el-menu-item>
+                  </el-submenu>
 
-                <el-submenu index="4">
-                  <span slot="title">{{ $t('navbar.meun4.title') }}</span>
-                  <el-menu-item index="4-1">{{ $t('navbar.meun4.menu.name1') }}</el-menu-item>
-                  <el-menu-item index="4-2">{{ $t('navbar.meun4.menu.name2') }}</el-menu-item>
-                  <el-menu-item index="4-3">{{ $t('navbar.meun4.menu.name3') }}</el-menu-item>
-                  <el-menu-item index="4-4">{{ $t('navbar.meun4.menu.name4') }}</el-menu-item>
-                </el-submenu>
+                  <el-submenu index="4">
+                    <span slot="title">{{ $t('navbar.meun4.title') }}</span>
+                    <el-menu-item index="4-1">{{ $t('navbar.meun4.menu.name1') }}</el-menu-item>
+                    <el-menu-item index="4-2">{{ $t('navbar.meun4.menu.name2') }}</el-menu-item>
+                    <el-menu-item index="4-3">{{ $t('navbar.meun4.menu.name3') }}</el-menu-item>
+                    <el-menu-item index="4-4">{{ $t('navbar.meun4.menu.name4') }}</el-menu-item>
+                  </el-submenu>
 
-                <el-menu-item index="5">{{ $t('navbar.meun5.title') }}</el-menu-item>
+                  <el-menu-item index="5">{{ $t('navbar.meun5.title') }}</el-menu-item>
 
-                <el-submenu index="6">
-                  <span slot="title">
-                    <img src="@/assets/imgs/language.png" alt="" style="height: 20px;">
-                  </span>
-                  <el-menu-item index="6-3">{{ $t('navbar.language.en') }}</el-menu-item>
-                  <el-menu-item index="6-1">{{ $t('navbar.language.cn') }}</el-menu-item>
-                </el-submenu>
+                  <el-submenu index="6">
+                    <span slot="title">
+                      <img src="@/assets/imgs/language.png" alt="" style="height: 20px;">
+                    </span>
+                    <el-menu-item index="6-3">{{ $t('navbar.language.en') }}</el-menu-item>
+                    <el-menu-item index="6-1">{{ $t('navbar.language.cn') }}</el-menu-item>
+                  </el-submenu>
 
-                <button v-if="!userInfo.address"  @click="openModal">
+                  <button v-if="!userInfo.address" @click="openModal">
+                    {{ $t('navbar.link') }}
+                  </button>
+                  <button v-else @click="showUserInfo">{{ userInfo.showAddress }}</button>
+                </el-menu>
+
+
+              </div>
+
+              <div class="menu1">
+
+                <el-menu :default-active="activeIndex" class="el-menu-demo2" ref="menuRef" mode="horizontal"
+                  @select="handleSelect" style="background: transparent;" :ellipsis="false">
+                  <el-submenu index="6">
+                    <span slot="title">
+                      <img src="@/assets/imgs/language.png" alt="" style="width: 20px;">
+                    </span>
+                    <el-menu-item index="6-3">{{ $t('navbar.language.en') }}</el-menu-item>
+                    <el-menu-item index="6-1">{{ $t('navbar.language.cn') }}</el-menu-item>
+
+                  </el-submenu>
+                </el-menu>
+                <button v-if="!userInfo.address" @click="openModal">
+
                   {{ $t('navbar.link') }}
                 </button>
-                <button v-else  @click="showUserInfo">{{ userInfo.showAddress}}</button> -->
-              </el-menu>
+                <button v-else @click="showUserInfo">{{ userInfo.showAddress }}</button>
+                <i class="el-icon-s-operation" style="margin-left: 20px;cursor: pointer;color:#fff;font-size: 20PX;"
+                  @click="drawer = true"></i>
+
+              </div>
 
 
             </div>
+          </el-col>
+        </el-row>
+      </div>
 
 
 
 
-          </div>
-        </el-col>
-      </el-row>
+
+
     </div>
 
+    <el-drawer size="80%" :visible.sync="drawer" :show-close="true">
+
+      <el-menu :default-active="activeIndex" class="el-menu-demo" @select="handleSelect" style="background: transparent;"
+        :ellipsis="false">
+        <el-submenu index="1">
+          <span slot="title">{{ $t('navbar.meun1.title') }}</span>
+          <el-menu-item index="1-1">{{ $t('navbar.meun1.menu.name1') }}</el-menu-item>
+          <el-menu-item index="1-2">{{ $t('navbar.meun1.menu.name2') }}</el-menu-item>
+        </el-submenu>
+
+        <el-submenu index="2">
+          <span slot="title">{{ $t('navbar.meun2.title') }}</span>
+          <el-menu-item index="2-1">{{ $t('navbar.meun2.menu.name1') }}</el-menu-item>
+          <el-menu-item index="2-2">{{ $t('navbar.meun2.menu.name2') }}</el-menu-item>
+          <el-menu-item index="2-3">{{ $t('navbar.meun2.menu.name3') }}</el-menu-item>
+          <el-menu-item index="2-4">{{ $t('navbar.meun2.menu.name4') }}</el-menu-item>
+        </el-submenu>
+
+        <el-submenu index="3">
+          <span slot="title">{{ $t('navbar.meun3.title') }}</span>
+          <el-menu-item index="3-1">{{ $t('navbar.meun3.menu.name1') }}</el-menu-item>
+          <el-menu-item index="3-2">{{ $t('navbar.meun3.menu.name2') }}</el-menu-item>
+        </el-submenu>
+
+        <el-submenu index="4">
+          <span slot="title">{{ $t('navbar.meun4.title') }}</span>
+          <el-menu-item index="4-1">{{ $t('navbar.meun4.menu.name1') }}</el-menu-item>
+          <el-menu-item index="4-2">{{ $t('navbar.meun4.menu.name2') }}</el-menu-item>
+          <el-menu-item index="4-3">{{ $t('navbar.meun4.menu.name3') }}</el-menu-item>
+          <el-menu-item index="4-4">{{ $t('navbar.meun4.menu.name4') }}</el-menu-item>
+        </el-submenu>
+
+        <el-menu-item index="5">{{ $t('navbar.meun5.title') }}</el-menu-item>
 
 
+      </el-menu>
 
-
+    </el-drawer>
 
   </div>
 </template>
@@ -211,6 +274,31 @@ export default {
       const signature = await signer?.signMessage('Hello Web3Modal Ethers')
       console.log(signature)
     },
+
+   handleSelect (index)  {
+
+      if (index == "6-3") {
+        window.localStorage.setItem("locale","en-us" )
+        window.location.reload();
+      //   document.documentElement.setAttribute('data-lang', locale.value);
+      //   setTimeout(() => {
+      //     menuRef.value && menuRef.value.close && menuRef.value.close('6')
+      //   }, 100)
+       }
+      if (index == "6-1") {
+        // alert(2)
+         window.localStorage.setItem("locale","zh-cn" )
+         window.location.reload();
+        // document.documentElement.setAttribute('data-lang', locale.value);
+        // setTimeout(() => {
+        //   menuRef.value && menuRef.value.close && menuRef.value.close('6')
+        // }, 100)
+      }
+      else if (index != "6-1" && index != "6-3") {
+        // openPopup()
+      }
+      // console.log("选中的菜单项：", index);
+    }
   },
   watch: {
     // 监听 $route 对象的变化
@@ -245,6 +333,7 @@ export default {
           console.log(address.value, chainId.value)
           this.ALL_LOGIN_SUCCESS({ address: address.value, chainId: chainId.value, walletProvider: this.walletProvider });
         } else {
+          // window.location.reload()
           this.LOGOUTED()
         }
       },
@@ -302,10 +391,7 @@ export default {
     console.log("currentNetwork-------", this.currentNetwork)
     this.createWeb3Modal()
     this.initData();
-    console.log(this.$route.path)
-    if (this.$route.path === "/home") {
-      this.isHome = true;
-    }
+    console.log('当前语言:', this.$i18n.locale);
   },
 };
 </script>
@@ -463,6 +549,8 @@ export default {
       align-items: center;
       justify-content: flex-end;
       width: 100%;
+      overflow: hidden;
+      flex-wrap: nowrap;
 
       img {
         height: 30px;
@@ -502,6 +590,7 @@ export default {
 
       .menu {
         display: block;
+        overflow: hidden;
       }
 
       .menu1 {
@@ -649,10 +738,12 @@ export default {
 
       .gridContent2 {
         height: 48px;
+        overflow: hidden;
         display: flex;
         align-items: center;
         justify-content: flex-end;
         width: 100%;
+        flex-wrap: nowrap;
 
         img {
           height: 30px;
@@ -674,6 +765,7 @@ export default {
           font-size: 16px;
           font-weight: 500;
           background: transparent;
+
         }
 
         .menu {

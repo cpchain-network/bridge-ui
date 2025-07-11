@@ -10,7 +10,7 @@ import enUS from './locales/en_US';
 
 // 实例化 i18n
 const i18n = new VueI18n({
-  locale: 'en-us',  // 默认语言
+  locale: window.localStorage.getItem("locale")|| 'en-us',  // 默认语言
   messages: {
     'zh-cn': zhCN,
     'en-us': enUS

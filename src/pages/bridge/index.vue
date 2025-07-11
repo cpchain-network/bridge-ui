@@ -1,9 +1,8 @@
 <template>
     <div class="bridge">
         <div class="swap-container" v-if="bridgeStep === 1">
-            <h1>随随时随地
-                <br>
-                轻轻松松跨链
+            <h1>
+                {{ $t('bridge.title') }}
             </h1>
             <div class="content">
                 <div class="item">
@@ -12,7 +11,7 @@
                             <img :src="require(`@/assets/imgs/chain/${fromChain.img}`)" alt="">
                         </div>
                         <div>
-                            <div class="label" style="text-align: left;">From</div>
+                            <div class="label" style="text-align: left;"> {{ $t('bridge.from') }}</div>
                             <div class="name">{{ fromChain.name }}</div>
                         </div>
                     </div>
@@ -22,7 +21,7 @@
                     <div class="chain-card right" @click="showChain(2)">
 
                         <div>
-                            <div class="label" style="text-align: right;">To</div>
+                            <div class="label" style="text-align: right;">{{ $t('bridge.to') }}</div>
                             <div class="name">{{ toChain.name }}</div>
                         </div>
                         <div>
@@ -49,7 +48,7 @@
                                 <path d="M6 8l4 4 4-4" stroke="#aaa" stroke-width="2" fill="none" stroke-linecap="round" />
                             </svg>
                         </div>
-                        <div class="amount-avail">可用
+                        <div class="amount-avail">{{ $t('bridge.Available') }}
                             <img src="@/assets/imgs/bridge/loading-gray.svg" v-if="isLoadingBalance" alt="">
                             <span v-else>
                                 &nbsp;{{ formattedFromBalance }}{{ coinChoose.name }}
@@ -61,14 +60,14 @@
 
                 <div class="summary-card">
                     <div class="summary-main">
-                        <img class="summary-icon" src="@/assets/imgs/coin/eth.svg" alt="ETH" />
+                        <img class="summary-icon" :src="require(`@/assets/imgs/coin/${coinChoose.img}`)" alt="ETH" />
                         <div class="summary-info">
                             <div class="summary-amt">{{ bridgeAmount }}{{ coinChoose.name }}</div>
                             <!-- <div class="summary-usd">$25.26</div> -->
                         </div>
                     </div>
                     <div class="summary-bottom">
-                        <div class="summary-fee">手续费 0.0(0.0000ETH)</div>
+                        <div class="summary-fee">{{ $t('bridge.handlingfee') }} 0.0(0.0000ETH)</div>
                         <div class="summary-time">
                             3~10 mins
                             <svg width="15" height="15" class="clock" viewBox="0 0 20 20">
@@ -94,8 +93,8 @@
 
                 </div>
                 <button class="submit-btn" :disabled="!isInsufficient" @click="tab(2)">
-                    <span v-if="!isInsufficient"> INSUFFICIENT FUNDS </span>
-                    <span v-else>跨链</span>
+                    <span v-if="!isInsufficient"> {{ $t('bridge.Insufficient') }} </span>
+                    <span v-else>{{ $t('bridge.Crosschain') }}</span>
                 </button>
             </div>
         </div>
@@ -103,7 +102,7 @@
             <!-- 顶部标题与关闭 -->
             <div class="modal-header">
                 <i class="el-icon-back" style="color: #fff;cursor: pointer;" @click="tab(1)"></i>
-                <span class="modal-title">确认信息</span>
+                <span class="modal-title"> {{ $t('bridge.sureTitle') }}</span>
                 <span class="close-btn" @click="$emit('close')">×</span>
             </div>
             <!-- 资产1 -->
@@ -111,7 +110,7 @@
                 <div class="block-row">
                     <div class="block-chain">
                         <img :src="require(`@/assets/imgs/chain/${fromChain.img}`)" class="block-icon" alt="">
-                        <span class="block-label">从{{ fromChain.name }}跨链</span>
+                        <span class="block-label">{{ $t('bridge.from') }}{{ fromChain.name }}{{ $t('bridge.Crosschain') }}</span>
                     </div>
                     <span class="block-addr"> {{ userInfo.address | ellipsisFilter }}</span>
                 </div>
@@ -125,7 +124,7 @@
                 <div class="block-row">
                     <div class="block-chain">
                         <img :src="require(`@/assets/imgs/chain/${toChain.img}`)" class="block-icon" alt="">
-                        <span class="block-label">{{ toChain.name }}获得</span>
+                        <span class="block-label">{{ toChain.name }}{{ $t('bridge.get') }}</span>
                     </div>
                     <span class="block-addr"> {{ userInfo.address | ellipsisFilter }}</span>
                 </div>
@@ -137,37 +136,37 @@
             <!-- 信息明细 -->
             <div class="modal-info">
                 <div class="info-row">
-                    <span class="info-label">通过</span>
-                    <span class="info-value">原生跨链</span>
+                    <span class="info-label">{{ $t('bridge.cross') }}</span>
+                    <span class="info-value">{{ $t('bridge.crossName') }}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">转账时间</span>
+                    <span class="info-label">{{ $t('bridge.time') }}</span>
                     <span class="info-value">3~10mins</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">费用</span>
+                    <span class="info-label">{{ $t('bridge.fee') }}</span>
                     <span class="info-value">$0.9(0.0005ETH)</span>
                 </div>
             </div>
             <!-- 底部按钮 -->
             <button class="modal-btn" :disabled="isProcessing" @click="bridgeMethod">
                 <img src="@/assets/imgs/bridge/loading.svg" v-if="isProcessing" alt="">
-                <span v-else>继续</span>
+                <span v-else>{{ $t('bridge.continues') }}</span>
             </button>
         </div>
         <div class="record">
             <div class="container">
 
                 <div class="cross-records">
-                    <div class="records-title">跨链记录</div>
+                    <div class="records-title">{{ $t('bridge.record.title') }}</div>
                     <div class="records-table">
                         <div class="records-thead">
-                            <div class="th">时间</div>
-                            <div class="th">代币</div>
-                            <div class="th">发出方</div>
-                            <div class="th">接收方</div>
-                            <div class="th">状态</div>
-                            <div class="th">操作</div>
+                            <div class="th">{{ $t('bridge.record.name1') }}</div>
+                            <div class="th">{{ $t('bridge.record.coin') }}</div>
+                            <div class="th">>{{ $t('bridge.record.send') }}</div>
+                            <div class="th">{{ $t('bridge.record.receive') }}</div>
+                            <div class="th">{{ $t('bridge.record.state.name') }}</div>
+                            <div class="th">{{ $t('bridge.record.state.opt') }}</div>
                         </div>
                         <div class="records-tr" v-for="(row, idx) in records" :key="idx" :class="{ 'alt': idx % 2 === 0 }">
                             <div class="td">{{ row.msg_sent_timestamp | formatTime }}</div>
@@ -176,12 +175,12 @@
                             <div class="td">{{ row.to_address | shortAddress }}</div>
                             <div class="td">
                                 <span :class="['status', row.status === 1 ? 'success' : 'fail']">
-                                    {{ row.status === 1 ? "成功" : "失败" }}
+                                    {{ row.status === 1 ?  $t('bridge.record.state.success')  :  $t('bridge.record.state.error')   }}
                                 </span>
                             </div>
                             <div class="td">
                                 <!-- <span v-if="row.status === '失败'" class="retry-btn">重试</span> -->
-                                <span class="detail-link">查看详情</span>
+                                <span class="detail-link">{{ $t('bridge.record.opt') }}</span>
                             </div>
                         </div>
                     </div>
@@ -202,7 +201,7 @@
                     <span class="close-btn" @click="handleClose">✕</span>
                 </div>
                 <div class="search-box">
-                    <input v-model="search" type="text" placeholder="搜索" @input="fliterChain()" />
+                    <input v-model="search" type="text" :placeholder="$t('bridge.search')"   @input="fliterChain()" />
                 </div>
 
                 <div class="chain-list">
@@ -227,7 +226,7 @@
                     <span class="close-btn" @click="showModal2 = false">✕</span>
                 </div>
                 <div class="search-box">
-                    <input v-model="search2" type="text" placeholder="搜索" @input="fliterCoin()" />
+                    <input v-model="search2" type="text" :placeholder="$t('bridge.search')"   @input="fliterCoin()" />
                 </div>
 
                 <div class="chain-list">
@@ -456,7 +455,7 @@ export default {
     },
     created() {
         this.getGas()
-        this.getBridgeRecordsList()
+        // this.getBridgeRecordsList()
     },
     methods: {
         handleCurrentChange(val) {
@@ -481,6 +480,8 @@ export default {
 
         //  获取桥历史记录
         async getBridgeRecordsList() {
+            console.log(this.userInfo.address)
+        var address=     this.userInfo.address =null? '0x155c8b4995b43c951016eb381478714b1e7f0e83' : this.userInfo.address;
             var result = await getBridgeRecords(
 
                 this.pageNumber,
@@ -658,6 +659,7 @@ export default {
                     this.bridgeStep = 1
                     this.initBridgeBalance()
                     this.$toast.success("Bridge Transaction Succeeded.")
+                 
                     // this.$router.push({ path: "history", query: { type: 1 } })
                 } else {
                     this.$toast.error("Bridge failed")
@@ -896,6 +898,8 @@ export default {
             } catch (e) {
                 console.error("initBridgeBalance---error ---", e)
             }
+           
+            this.getBridgeRecordsList()
             this.isLoadingBalance = false;
         },
         numberToHex(decimalNumber) {

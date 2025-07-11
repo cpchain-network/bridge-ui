@@ -23,6 +23,9 @@
     background-color: transparent;
     /* color: red !important; */
 }
+.el-menu--horizontal .el-menu-item:not(.is-disabled):hover{
+    color: #00ce7a;
+}
 
 .el-menu--horizontal .el-menu .el-menu-item,
 .el-menu--horizontal .el-menu .el-submenu__title {
@@ -35,11 +38,27 @@
     overflow     : hidden;
     padding      : 10px;
 }
-
+.el-submenu__title:focus, .el-submenu__title:hover  {
+    background-color: transparent;
+}
+.el-menu-item:focus, .el-menu-item:hover  {
+    background-color: transparent;
+}
 .el-submenu__title span {
     color: #fff;
 }
-
+.el-menu {
+    background: transparent;
+}
+.el-menu-item.is-active  {
+    color: #00ce7a;
+}
+.el-menu-item  {
+    color: #fff;
+}
+.el-drawer__close-btn  {
+    color: #fff;
+}
 .el-menu.el-menu--horizontal {
     border-bottom: 0;
 }
@@ -69,6 +88,14 @@
 .el-menu--horizontal>.el-submenu .el-submenu__icon-arrow {
     margin-left: 10px;
     margin-top: 0px;
+}
+.el-drawer {
+    z-index: 3000  !important;
+    background: #1e1e1e;
+}
+.v-modal  {
+    background: rgba(0,0,0, 0.5);
+    z-index: 1000 !important;
 }
 body {
     /* 启用滚动，但隐藏滚动条 */
