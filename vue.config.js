@@ -41,5 +41,6 @@ module.exports = defineConfig({
         }
       }
     },
+    host: true,
   },
 })
