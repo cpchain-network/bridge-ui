@@ -705,7 +705,7 @@ export default {
                 let signer = await this.provider.getSigner()
                 let bridgeContract = new ethers.Contract(this.fromChain.bridgeContract, bridgeABI, signer)
                 // console.log('bridgeContract.BridgeInitiateETH------', bridgeContract.BridgeInitiateETH)
-                console.log(445, this.fromChain.chainId, this.toChain.chainId);
+                console.log(this.fromChain.chainId, this.toChain.chainId, this.userInfo.address);
                 let tx = await bridgeContract.BridgeInitiateETH.send(this.fromChain.chainId, this.toChain.chainId, this.userInfo.address, {
                     value: valueInWei // 添加这一行，指定发送的以太币数量
                 })
