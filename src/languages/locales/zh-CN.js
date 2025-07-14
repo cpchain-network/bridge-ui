@@ -25,6 +25,7 @@ export default {
       opt:"查看详情"
 
     },
+    search:"搜索",
     sureTitle:"确认信息",
     from :"从",
     to:"到",

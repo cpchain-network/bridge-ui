@@ -67,7 +67,11 @@
                         </div>
                     </div>
                     <div class="summary-bottom">
-                        <div class="summary-fee">{{ $t('bridge.handlingfee') }} 0.0(0.0000ETH)</div>
+                        <div class="summary-fee">{{ $t('bridge.handlingfee') }} 
+                            
+                            <img v-if="isloadingGas" src="@/assets/imgs/bridge/loading-gray.svg" alt="">
+                            <span v-else> ${{allusdtFees}}({{allbridgeFees}}{{coinChoose.name}})</span>
+                           </div>
                         <div class="summary-time">
                             3~10 mins
                             <svg width="15" height="15" class="clock" viewBox="0 0 20 20">
@@ -82,14 +86,14 @@
 
                 </div>
                 <div id="gascontainer">
-                    <span>gas:</span>
+                    <!-- <span>gas:</span>
 
                     <img v-if="isloadingGas" src="@/assets/imgs/bridge/loading-gray.svg" alt="">
                     <span v-else>
                         {{ gasFeeEthStr }}
 
                         ETH
-                    </span>
+                    </span> -->
 
                 </div>
                 <button class="submit-btn" :disabled="!isInsufficient" @click="tab(2)">
@@ -110,7 +114,8 @@
                 <div class="block-row">
                     <div class="block-chain">
                         <img :src="require(`@/assets/imgs/chain/${fromChain.img}`)" class="block-icon" alt="">
-                        <span class="block-label">{{ $t('bridge.from') }}{{ fromChain.name }}{{ $t('bridge.Crosschain') }}</span>
+                        <span class="block-label">{{ $t('bridge.from') }}{{ fromChain.name }}{{ $t('bridge.Crosschain')
+                        }}</span>
                     </div>
                     <span class="block-addr"> {{ userInfo.address | ellipsisFilter }}</span>
                 </div>
@@ -129,7 +134,7 @@
                     <span class="block-addr"> {{ userInfo.address | ellipsisFilter }}</span>
                 </div>
                 <div class="block-amount">
-                    <img src="@/assets/imgs/coin/eth.svg" class="amount-icon" alt="">
+                    <img :src="require(`@/assets/imgs/chain/${coinChoose.img}`)" class="amount-icon" alt="">
                     <span class="amount-value">{{ bridgeAmount }} {{ coinChoose.name }}</span>
                 </div>
             </div>
@@ -145,7 +150,7 @@
                 </div>
                 <div class="info-row">
                     <span class="info-label">{{ $t('bridge.fee') }}</span>
-                    <span class="info-value">$0.9(0.0005ETH)</span>
+                    <span class="info-value">${{allusdtFees}}({{allbridgeFees}}{{coinChoose.name}})</span>
                 </div>
             </div>
             <!-- 底部按钮 -->
@@ -163,7 +168,7 @@
                         <div class="records-thead">
                             <div class="th">{{ $t('bridge.record.name1') }}</div>
                             <div class="th">{{ $t('bridge.record.coin') }}</div>
-                            <div class="th">>{{ $t('bridge.record.send') }}</div>
+                            <div class="th">{{ $t('bridge.record.send') }}</div>
                             <div class="th">{{ $t('bridge.record.receive') }}</div>
                             <div class="th">{{ $t('bridge.record.state.name') }}</div>
                             <div class="th">{{ $t('bridge.record.state.opt') }}</div>
@@ -175,7 +180,8 @@
                             <div class="td">{{ row.to_address | shortAddress }}</div>
                             <div class="td">
                                 <span :class="['status', row.status === 1 ? 'success' : 'fail']">
-                                    {{ row.status === 1 ?  $t('bridge.record.state.success')  :  $t('bridge.record.state.error')   }}
+                                    {{ row.status === 1 ? $t('bridge.record.state.success') :
+                                        $t('bridge.record.state.error') }}
                                 </span>
                             </div>
                             <div class="td">
@@ -201,7 +207,7 @@
                     <span class="close-btn" @click="handleClose">✕</span>
                 </div>
                 <div class="search-box">
-                    <input v-model="search" type="text" :placeholder="$t('bridge.search')"   @input="fliterChain()" />
+                    <input v-model="search" type="text" :placeholder="$t('bridge.search')" @input="fliterChain()" />
                 </div>
 
                 <div class="chain-list">
@@ -226,7 +232,7 @@
                     <span class="close-btn" @click="showModal2 = false">✕</span>
                 </div>
                 <div class="search-box">
-                    <input v-model="search2" type="text" :placeholder="$t('bridge.search')"   @input="fliterCoin()" />
+                    <input v-model="search2" type="text" :placeholder="$t('bridge.search')" @input="fliterCoin()" />
                 </div>
 
                 <div class="chain-list">
@@ -245,18 +251,22 @@
             <span>这是一段信息</span>
            
         </el-dialog> -->
+       
     </div>
 </template>
 
 <script>
 import {
-    ethers, Network, JsonRpcProvider, formatUnits
+    ethers, Network, JsonRpcProvider, formatUnits,
+    parseEther,
 } from 'ethers';
+import BigNumber from 'bignumber.js';
 import axios from 'axios';
 import erc20ABI from "@/assets/abi/erc20ABI"
 import bridge from "@/assets/abi/bridgeABI"
 const bridgeABI = bridge.abi
-import { getGasFees } from '@/api/getGasFee'
+// import { getGasFees } from '@/api/getGasFee'
+import { getbridgeFees } from "@/api/bridgePrice"
 import { getBridgeRecords } from '@/api/records'
 import networks from "../../assets/json/active-networks.json"
 console.log(networks)
@@ -266,7 +276,8 @@ import {
     mapMutations,
     mapState
 } from "vuex";
-const coinList = [{
+const coinList = [
+    {
     img: "eth.svg",
     name: "ETH",
     minBridgeAmount: 0.001
@@ -274,24 +285,26 @@ const coinList = [{
     img: "usdt.svg",
     name: "USDT",
     minBridgeAmount: 0.001
-}, {
-    img: "usdc.svg",
-    name: "USDC",
-    minBridgeAmount: 0.001
-}, {
-    img: "dai.png",
-    name: "DAI",
-    minBridgeAmount: 0.001
-}, {
-    img: "eth.svg",
-    name: "WETH",
-    minBridgeAmount: 0.1
-},
-{
-    img: "okb.png",
-    name: "OKB",
-    minBridgeAmount: 0.001
-}]
+}, 
+// {
+//     img: "usdc.svg",
+//     name: "USDC",
+//     minBridgeAmount: 0.001
+// }, {
+//     img: "dai.png",
+//     name: "DAI",
+//     minBridgeAmount: 0.001
+// }, {
+//     img: "eth.svg",
+//     name: "WETH",
+//     minBridgeAmount: 0.1
+// },
+// {
+//     img: "okb.png",
+//     name: "OKB",
+//     minBridgeAmount: 0.001
+// }
+]
 export default {
     name: 'CrossRecords',
     data() {
@@ -302,7 +315,8 @@ export default {
             isloadingGas: true,
             records: [
             ],
-
+            allusdtFees: 0,
+            allbridgeFees: 0,
             showModal: false,
             showModal2: false,
             selected: "cp",
@@ -325,7 +339,7 @@ export default {
             dialogVisible: false,
             coinChooseVisible: false,
             selectedOption: null,
-            Visible:true,
+            Visible: true,
             isLoadingBalance: false,
             position: '',
             bridgeStep: 1,
@@ -337,7 +351,8 @@ export default {
                 name: "ETH",
                 minBridgeAmount: 0.001
             },
-            allCoinList: [{
+            allCoinList: [
+                {
                 img: "eth.svg",
                 name: "ETH",
                 minBridgeAmount: 0.001
@@ -345,25 +360,28 @@ export default {
                 img: "usdt.svg",
                 name: "USDT",
                 minBridgeAmount: 0.001
-            }, {
-                img: "usdc.svg",
-                name: "USDC",
-                minBridgeAmount: 0.001
-            }, {
-                img: "dai.png",
-                name: "DAI",
-                minBridgeAmount: 0.001
-            }, {
-                img: "eth.svg",
-                name: "WETH",
-                minBridgeAmount: 0.1
             },
-            {
-                img: "okb.png",
-                name: "OKB",
-                minBridgeAmount: 0.001
-            }],
-            coinList: [{
+            //  {
+            //     img: "usdc.svg",
+            //     name: "USDC",
+            //     minBridgeAmount: 0.001
+            // }, {
+            //     img: "dai.png",
+            //     name: "DAI",
+            //     minBridgeAmount: 0.001
+            // }, {
+            //     img: "eth.svg",
+            //     name: "WETH",
+            //     minBridgeAmount: 0.1
+            // },
+            // {
+            //     img: "okb.png",
+            //     name: "OKB",
+            //     minBridgeAmount: 0.001
+            // }
+        ],
+            coinList: [
+                {
                 img: "eth.svg",
                 name: "ETH",
                 minBridgeAmount: 0.001
@@ -371,24 +389,26 @@ export default {
                 img: "usdt.svg",
                 name: "USDT",
                 minBridgeAmount: 0.001
-            }, {
-                img: "usdc.svg",
-                name: "USDC",
-                minBridgeAmount: 0.001
-            }, {
-                img: "dai.png",
-                name: "DAI",
-                minBridgeAmount: 0.001
-            }, {
-                img: "eth.svg",
-                name: "WETH",
-                minBridgeAmount: 0.1
-            },
-            {
-                img: "okb.png",
-                name: "OKB",
-                minBridgeAmount: 0.001
-            }
+            }, 
+            
+            // {
+            //     img: "usdc.svg",
+            //     name: "USDC",
+            //     minBridgeAmount: 0.001
+            // }, {
+            //     img: "dai.png",
+            //     name: "DAI",
+            //     minBridgeAmount: 0.001
+            // }, {
+            //     img: "eth.svg",
+            //     name: "WETH",
+            //     minBridgeAmount: 0.1
+            // },
+            // {
+            //     img: "okb.png",
+            //     name: "OKB",
+            //     minBridgeAmount: 0.001
+            // }
             ],
             userHasStaking: true,
             remainingSeconds: 0,
@@ -434,7 +454,7 @@ export default {
         },
         isInsufficient() {
             // console.log(this.fromBalance, this.coinChoose.minBridgeAmount)
-
+              console.log(this.amount)
             // console.log(typeof this.fromBalance, typeof this.coinChoose.minBridgeAmount, this.fromBalance >= this.coinChoose.minBridgeAmount)
             return this.fromBalance >= this.coinChoose.minBridgeAmount &&
                 this.fromBalance >= this.amount
@@ -454,8 +474,10 @@ export default {
         }
     },
     created() {
-        this.getGas()
+        // this.getGas()
         // this.getBridgeRecordsList()
+
+        this.getBridgeFees()
     },
     methods: {
         handleCurrentChange(val) {
@@ -463,31 +485,54 @@ export default {
             this.getBridgeRecordsList()
         },
         //  获取gas  费用
-        async getGas() {
-            this.isloadingGas = true
+        // async getGas() {
+        //     this.isloadingGas = true
+        //     if (chainId && chainId?.value !== this.fromChain?.chainId) {
+
+        //         await this.switchNet(this.fromChain)
+        //         return
+        //     }
+        //     var chainId = this.fromChain.chainId
+        //     var result = await getGasFees(chainId)
+        //     // console.log(result.data.gas_fee)
+        //     this.weiToEth(result.data.gas_fee)
+        //     this.isloadingGas = false
+
+        // },
+        //  获取目标链手续费
+        async getBridgeFees() {
+         this.isloadingGas  =  true
             if (chainId && chainId?.value !== this.fromChain?.chainId) {
 
                 await this.switchNet(this.fromChain)
                 return
             }
-            var chainId = this.fromChain.chainId
-            var result = await getGasFees(chainId)
-            // console.log(result.data.gas_fee)
-            this.weiToEth(result.data.gas_fee)
-            this.isloadingGas = false
+            this.allusdtFees = ""
+            this.allbridgeFees = ""
+            var chainId = this.toChain.chainId
+            var symbol = this.coinChoose.name.toLowerCase()
+            var result = await getbridgeFees(chainId, symbol)
+            this.allbridgeFees = result.data.predict_fee
+            // this.allusdtFees =
+            this.allusdtFees = this.calculateMarketPriceTimesFee(result.data.market_price, result.data.predict_fee)
+            this.isloadingGas  =  false
+            // this.allbridgeFees = result
 
         },
-
         //  获取桥历史记录
         async getBridgeRecordsList() {
             console.log(this.userInfo.address)
-        var address=     this.userInfo.address =null? '0x155c8b4995b43c951016eb381478714b1e7f0e83' : this.userInfo.address;
+            var address = ""
+            if(this.userInfo.address) {
+                address = this.userInfo.address
+            }
+            // var address = this.userInfo.address = null ? '0x155c8b4995b43c951016eb381478714b1e7f0e83' : this.userInfo.address;
             var result = await getBridgeRecords(
 
                 this.pageNumber,
                 this.pageSize,
                 "desc",
-                "0x155c8b4995b43c951016eb381478714b1e7f0e83"
+                address
 
 
             )
@@ -499,6 +544,16 @@ export default {
             console.log(result.data.Records)
 
         },
+
+        calculateMarketPriceTimesFee(market_price_str, predict_fee_str) {
+            const predict_fee = new BigNumber(predict_fee_str);
+            const market_price = new BigNumber(market_price_str);
+
+            const result = predict_fee.multipliedBy(market_price);
+
+            return result.toFixed(6);  // 保留 8 位小数
+        },
+
         weiToEth(num) {
             const gasFeeWei = BigInt(num); // 这里模拟接口返回大整数
 
@@ -590,6 +645,7 @@ export default {
             this.coinChoose = val
             this.showModal2 = false
             this.initBridgeBalance()
+           this.getBridgeFees()
         },
         switchChain() {
 
@@ -659,7 +715,7 @@ export default {
                     this.bridgeStep = 1
                     this.initBridgeBalance()
                     this.$toast.success("Bridge Transaction Succeeded.")
-                 
+
                     // this.$router.push({ path: "history", query: { type: 1 } })
                 } else {
                     this.$toast.error("Bridge failed")
@@ -898,7 +954,7 @@ export default {
             } catch (e) {
                 console.error("initBridgeBalance---error ---", e)
             }
-           
+
             this.getBridgeRecordsList()
             this.isLoadingBalance = false;
         },
@@ -972,7 +1028,7 @@ export default {
         amount(newValue, oldValue) {
             this.validatePositiveNumber(newValue, oldValue);
             // this.bridgeAmount = (this.amount * (1 - this.bridgeFee)).toFixed(5)
-            this.bridgeAmount = (Math.floor(this.amount * (1 - this.bridgeFee) * 100000) / 100000).toFixed(5);
+            this.bridgeAmount = (Math.floor(this.amount * (1 - this.allbridgeFees) * 100000) / 100000).toFixed(5);
 
         },
         'userInfo': {
@@ -1000,11 +1056,13 @@ export default {
             handler: function (newName, oldName) {
                 // 当 `toChain.name` 发生变化时，将会执行这里的代码
                 this.filterCoinList(this.toChain, this.fromChain);
+                this.getBridgeFees()
+                
             },
         },
         "fromChain.chainId": {
             handler: function (newName, oldName) {
-                this.getGas()
+                // this.getGas()
             }
         },
 
@@ -1460,12 +1518,20 @@ export default {
                     // margin-top: 10px;
 
                     .summary-fee {
+                        display: flex;
                         color: #8E8E92;
 
                         font-size: 12px;
                         font-style: normal;
                         font-weight: 400;
                         line-height: normal;
+                        span  {
+                            color: #8E8E92;
+                        };
+                        img {
+                            width: 20px;
+                            animation: rotate 5s linear infinite;
+                        }
                     }
 
                     .summary-time {
