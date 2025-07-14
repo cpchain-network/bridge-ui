@@ -48,7 +48,7 @@
     color: #fff;
 }
 .el-menu {
-    background: transparent;
+    background: #1e1e1e;
 }
 .el-menu-item.is-active  {
     color: #00ce7a;
