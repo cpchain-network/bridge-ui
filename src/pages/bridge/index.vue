@@ -175,7 +175,7 @@
                         </div>
                         <div class="records-tr" v-for="(row, idx) in records" :key="idx" :class="{ 'alt': idx % 2 === 0 }">
                             <div class="td">{{ row.msg_sent_timestamp | formatTime }}</div>
-                            <div class="td">{{ row.token }}</div>
+                            <div class="td">{{ row.dest_token_address | shortAddress}}</div>
                             <div class="td">{{ row.from_address | shortAddress }}</div>
                             <div class="td">{{ row.to_address | shortAddress }}</div>
                             <div class="td">
