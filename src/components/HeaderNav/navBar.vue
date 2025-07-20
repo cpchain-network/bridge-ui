@@ -153,6 +153,8 @@ import {
 } from '@web3modal/ethers/vue'
 import { BrowserProvider } from 'ethers'
 import networks from '@/assets/json/networks'
+
+// 
 export default {
   name: "HeaderNav",
   data() {
