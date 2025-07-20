@@ -153,7 +153,7 @@
                     <span class="info-value">${{allusdtFees}}({{allbridgeFees}}{{coinChoose.name}})</span>
                 </div>
             </div>
-            <!-- 底部按钮 -->
+            <!-- 底部按钮 222-->
             <button class="modal-btn" :disabled="isProcessing" @click="bridgeMethod">
                 <img src="@/assets/imgs/bridge/loading.svg" v-if="isProcessing" alt="">
                 <span v-else>{{ $t('bridge.continues') }}</span>

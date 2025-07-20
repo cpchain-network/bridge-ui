@@ -1,4 +1,4 @@
-# dapplink_bridge
+# cp_bridge
 
 ## Project setup
 ```
