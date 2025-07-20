@@ -159,6 +159,8 @@ export default {
     return {
       drawer: false,
       localLogin: false,
+      active:"",
+      activeIndex:"",
       topMenus: [
         {
           title: "Bridge",
@@ -529,7 +531,7 @@ export default {
     // border-radius: 100px;
     backdrop-filter: blur(14px);
     padding: 0 24px;
-    width: calc(100% - 48px);
+    width: 100%;
     // border-radius: 100px;
 
     .gridContent {
