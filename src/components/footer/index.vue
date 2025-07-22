@@ -86,6 +86,9 @@ export default {
       }
       // 没有匹配就原样返回
       return str;
+    },
+    openPopup(){
+      console.log("")
     }
   }
 }
