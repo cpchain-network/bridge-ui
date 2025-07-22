@@ -18,7 +18,8 @@ export default {
       send:"发出方",
       total:"金额",
       receive:"接收方",
-      sourcehash:"交易哈希",
+      sourcehash:"源链哈希",
+      tosourcehash:"目标链哈希",
       fee:"手续费",
       state:{
         name:"状态",

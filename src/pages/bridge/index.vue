@@ -51,8 +51,8 @@
             <div class="amount-avail">{{ $t('bridge.Available') }}
               <img src="@/assets/imgs/bridge/loading-gray.svg" v-if="isLoadingBalance" alt="">
               <span v-else>
-                                &nbsp;{{ formattedFromBalance }}{{ coinChoose.name }}
-                            </span>
+                &nbsp;{{ formattedFromBalance }}{{ coinChoose.name }}
+              </span>
 
             </div>
           </div>
@@ -76,10 +76,8 @@
               3~10 mins
               <svg width="15" height="15" class="clock" viewBox="0 0 20 20">
                 <circle cx="10" cy="10" r="8" stroke="#a0a0a0" stroke-width="1.5" fill="none" />
-                <line x1="10" y1="10" x2="10" y2="6" stroke="#a0a0a0" stroke-width="1.2"
-                      stroke-linecap="round" />
-                <line x1="10" y1="10" x2="13.3" y2="12.1" stroke="#a0a0a0" stroke-width="1.2"
-                      stroke-linecap="round" />
+                <line x1="10" y1="10" x2="10" y2="6" stroke="#a0a0a0" stroke-width="1.2" stroke-linecap="round" />
+                <line x1="10" y1="10" x2="13.3" y2="12.1" stroke="#a0a0a0" stroke-width="1.2" stroke-linecap="round" />
               </svg>
             </div>
           </div>
@@ -115,7 +113,7 @@
           <div class="block-chain">
             <img :src="require(`@/assets/imgs/chain/${fromChain.img}`)" class="block-icon" alt="">
             <span class="block-label">{{ $t('bridge.from') }}{{ fromChain.name }}{{ $t('bridge.Crosschain')
-              }}</span>
+            }}</span>
           </div>
           <span class="block-addr"> {{ userInfo.address | ellipsisFilter }}</span>
         </div>
@@ -167,6 +165,7 @@
           <div class="records-table">
             <div class="records-thead">
               <div class="th">{{ $t('bridge.record.sourcehash') }}</div>
+              <div class="th">{{ $t('bridge.record.tosourcehash') }}</div>
               <div class="th">{{ $t('bridge.record.name1') }}</div>
               <div class="th">{{ $t('bridge.record.coin') }}</div>
               <div class="th">{{ $t('bridge.record.fee') }}</div>
@@ -178,28 +177,32 @@
               <!-- <div class="th">{{ $t('bridge.record.state.opt') }}</div> -->
             </div>
             <div class="records-tr" v-for="(row, idx) in records" :key="idx" :class="{ 'alt': idx % 2 === 0 }">
-              <div class="td" style="cursor: pointer;color: #ccc;"
-                   @click="gotoScan('tx',row.source_tx_hash, row.source_chain_id)">{{ row.source_tx_hash |
+              <div class="td" style="cursor: pointer;color: #00CE7A;"
+                @click="gotoScan('tx', row.source_tx_hash, row.source_chain_id)">{{ row.source_tx_hash |
+                  shortAddress }}</div>
+
+              <div class="td" style="cursor: pointer;color: #00CE7A;"
+                @click="gotoScan('tx', row.dest_tx_hash, row.dest_chain_id)">{{ row.dest_tx_hash |
                   shortAddress }}</div>
               <div class="td">{{ row.msg_sent_timestamp | formatTime }}</div>
               <div class="td">{{ row.token_name }}</div>
               <div class="td">{{ row.fee | formatToken("ETH") }}</div>
               <div class="td">{{ row.amount | formatToken(row.token_name) }}</div>
-              <div class="td" style="cursor: pointer;color: #ccc;"  @click="gotoScan('address', row.from_address, row.source_chain_id)">{{ row.from_address | shortAddress }}</div>
-              <div class="td" style="cursor: pointer;color: #ccc;" @click="gotoScan('address', row.to_address, row.dest_chain_id)">{{ row.to_address | shortAddress }}</div>
+              <div class="td" style="cursor: pointer;">{{ row.from_address | shortAddress }}</div>
+              <div class="td" style="cursor: pointer;">{{ row.to_address | shortAddress }}</div>
               <div class="td">
-                                <span :class="['status', row.status === 1 ? 'success' : 'fail']">
-                                    {{ row.status === 1 ? $t('bridge.record.state.success') :
-                                    $t('bridge.record.state.error') }}
-                                </span>
+                <span :class="['status', row.status === 1 ? 'success' : 'fail']">
+                  {{ row.status === 1 ? $t('bridge.record.state.success') :
+                    $t('bridge.record.state.error') }}
+                </span>
               </div>
 
             </div>
           </div>
         </div>
         <div class="pagination">
-          <el-pagination layout="prev, pager, next" :total="Total" :current-page.sync="pageNumber"
-                         :page-size="pageSize" @current-change="handleCurrentChange">
+          <el-pagination layout="prev, pager, next" :total="Total" :current-page.sync="pageNumber" :page-size="pageSize"
+            @current-change="handleCurrentChange">
           </el-pagination>
         </div>
       </div>
@@ -217,8 +220,8 @@
         </div>
 
         <div class="chain-list">
-          <div v-for="chain in chains" :key="chain.id" class="chain-item"
-               :class="{ active: chain.name === selected }" @click="select(chain)">
+          <div v-for="chain in chains" :key="chain.id" class="chain-item" :class="{ active: chain.name === selected }"
+            @click="select(chain)">
             <img :src="require(`@/assets/imgs/chain/${chain.img}`)" class="chain-icon" alt="" />
 
             <span class="chain-name">{{ chain.name }}</span>
@@ -243,7 +246,7 @@
 
         <div class="chain-list">
           <div v-for="coin in allCoinList" :key="coin.name" class="chain-item"
-               :class="{ active: coin.name === coinChoose.name }" @click="select2(coin)">
+            :class="{ active: coin.name === coinChoose.name }" @click="select2(coin)">
             <img :src="require(`@/assets/imgs/coin/${coin.img}`)" class="chain-icon" alt="" />
 
             <span class="chain-name">{{ coin.name }}</span>
@@ -430,8 +433,8 @@ export default {
   computed: {
     filteredChains() {
       return this.chains.filter(
-          c =>
-              c.name.toLowerCase().includes(this.search.toLowerCase())
+        c =>
+          c.name.toLowerCase().includes(this.search.toLowerCase())
 
       );
     },
@@ -459,14 +462,14 @@ export default {
       console.log(this.amount)
       // console.log(typeof this.fromBalance, typeof this.coinChoose.minBridgeAmount, this.fromBalance >= this.coinChoose.minBridgeAmount)
       return this.fromBalance >= this.coinChoose.minBridgeAmount &&
-          this.fromBalance >= this.amount
+        this.fromBalance >= this.amount
     },
     isStakeInsufficient() {
       // console.log(this.fromBalance, this.coinChoose.minBridgeAmount)
 
       // console.log(typeof this.fromBalance, typeof this.coinChoose.minBridgeAmount, this.fromBalance >= this.coinChoose.minBridgeAmount)
       return this.fromBalance >= this.coinChoose.minBridgeAmount &&
-          this.fromBalance >= this.stakeAmount
+        this.fromBalance >= this.stakeAmount
     },
     isCanConfirm() {
       return this.amount != null && this.amount >= this.coinChoose.minBridgeAmount
@@ -489,7 +492,7 @@ export default {
         window.open(url, "_blank");
       }
     },
-    handleCurrentChange(val){},
+    handleCurrentChange(val) { },
     //  获取gas  费用
     // async getGas() {
     //     this.isloadingGas = true
@@ -528,17 +531,17 @@ export default {
     //  获取桥历史记录
     async getBridgeRecordsList() {
       console.log(this.userInfo.address)
-      var address = "0x155c8b4995b43c951016eb381478714b1e7f0e83"
-      // if(this.userInfo.address) {
-      //     address = this.userInfo.address
-      // }
+      var address = ""
+      if(this.userInfo.address) {
+          address = this.userInfo.address
+      }
       // var address = this.userInfo.address = null ? '0x155c8b4995b43c951016eb381478714b1e7f0e83' : this.userInfo.address;
       var result = await getBridgeRecords(
 
-          this.pageNumber,
-          this.pageSize,
-          "desc",
-          address
+        this.pageNumber,
+        this.pageSize,
+        "desc",
+        address
 
 
       )
@@ -582,8 +585,8 @@ export default {
     },
     fliterChain() {
       var arr = this.chains.filter(
-          c =>
-              c.name.toLowerCase().includes(this.search.toLowerCase().trim())
+        c =>
+          c.name.toLowerCase().includes(this.search.toLowerCase().trim())
 
       );
 
@@ -598,8 +601,8 @@ export default {
 
     fliterCoin() {
       var arr = this.allCoinList.filter(
-          c =>
-              c.name.toLowerCase().includes(this.search2.toLowerCase().trim())
+        c =>
+          c.name.toLowerCase().includes(this.search2.toLowerCase().trim())
 
       );
 
@@ -1110,7 +1113,7 @@ export default {
       const minutes = String(date.getMinutes()).padStart(2, '0');
       const seconds = String(date.getSeconds()).padStart(2, '0');
 
-      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+      return `${year}.${month}.${day} ${hours}:${minutes}:${seconds}`;
     },
     formatToken(value, symbol) {
       if (!value || !symbol) return '0';
@@ -1140,7 +1143,7 @@ export default {
 .bridge {
   button:disabled {
     cursor: not-allowed
-    /* ... */
+      /* ... */
   }
 
   :deep(.el-pager li) {
@@ -1549,7 +1552,7 @@ export default {
               color: #8E8E92;
             }
 
-          ;
+            ;
 
             img {
               width: 20px;
@@ -1654,7 +1657,7 @@ export default {
               flex: 1;
               padding: 0 10px;
               color: #8E8E92;
-
+              text-align: center;
               font-size: 12px;
               font-style: normal;
               font-weight: 400;
@@ -1664,13 +1667,14 @@ export default {
 
           .records-tr {
             min-height: 48px;
-            height: 48px;
+            // height: 48px;
             // background: #191b1e;
             color: #f2f2f2;
             transition: background 0.15s;
 
             .td {
               flex: 1;
+              // text-align: center;
               padding: 0 10px;
               color: #FFF;
 
@@ -1678,9 +1682,9 @@ export default {
               font-style: normal;
               font-weight: 500;
               line-height: normal;
-              white-space: nowrap;
-              overflow: hidden;
-              text-overflow: ellipsis;
+              // white-space: nowrap;
+              // overflow: hidden;
+              // text-overflow: ellipsis;
             }
 
             &.alt {
@@ -2035,7 +2039,7 @@ export default {
 
         &::placeholder {
           color: #666868;
-        ;
+          ;
         }
       }
     }
@@ -2103,4 +2107,5 @@ export default {
       opacity: 1;
     }
   }
-}</style>
+}
+</style>

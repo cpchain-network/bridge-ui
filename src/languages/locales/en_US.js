@@ -17,7 +17,8 @@ export default {
       send: "Sender",
       total:"Amount",
       receive: "Receiver",
-      sourcehash:"Txn Hash",
+      sourcehash: "Source chain hash",
+      tosourcehash: "Target chain hash",
       fee:"Txn Fee",
       state: {
         name: "Status",
