@@ -1,5 +1,5 @@
 <template>
-   <div class="footer">
+  <div class="footer">
     <el-row :gutter="10">
       <el-col :xs="24" :sm="8">
         <div class="name1">
@@ -7,16 +7,16 @@
         </div>
         <div class="name2" v-html="cpChainLineBreak($t('footers.title'))"></div>
 
-        <div style="height: 60px;display: flex;" class="icon">
-          <a target="_blank" style="display: block;"  href="https://x.com/CPCHAINGLOBAL">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="16" viewBox="0 0 18 16" fill="none">
-                <path
-                  d="M14.176 0H16.9362L10.9061 6.77744L18 16H12.4456L8.09512 10.4066L3.11722 16H0.355444L6.80517 8.75077L0 0H5.69546L9.62788 5.11262L14.176 0ZM13.2073 14.3754H14.7368L4.8644 1.53929H3.22317L13.2073 14.3754Z"
-                  fill="white" />
-              </svg>
+        <div class="icon">
+          <a target="_blank" href="https://x.com/CPCHAINGLOBAL">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 18 16" fill="none">
+              <path
+                d="M14.176 0H16.9362L10.9061 6.77744L18 16H12.4456L8.09512 10.4066L3.11722 16H0.355444L6.80517 8.75077L0 0H5.69546L9.62788 5.11262L14.176 0ZM13.2073 14.3754H14.7368L4.8644 1.53929H3.22317L13.2073 14.3754Z"
+                fill="white" />
+            </svg>
 
 
-            </a>
+          </a>
         </div>
 
         <div class="contact">
@@ -24,9 +24,9 @@
         </div>
       </el-col>
 
-      <el-col :xs="24" :sm="4" >
+      <el-col :xs="24" :sm="4">
         <br>
-</el-col>
+      </el-col>
       <el-col :xs="12" :sm="3">
         <div class="title">{{ $t('footers.content1.title') }}</div>
         <div class="list" @click="openPopup">{{ $t('footers.content1.name1') }}</div>
@@ -63,7 +63,7 @@
 export default {
   data() {
     return {
-      iconSize:15
+      iconSize: 15
     }
   },
   methods: {
@@ -86,6 +86,9 @@ export default {
       }
       // 没有匹配就原样返回
       return str;
+    },
+    openPopup(){
+      console.log("")
     }
   }
 }
@@ -104,6 +107,7 @@ export default {
   // justify-content: flex-start; 
   padding: 0 76px;
   padding-bottom: 118px;
+  padding-top: 80px;
 
   .content {
     // max-width: 1200px;
@@ -111,6 +115,14 @@ export default {
   }
 
   .icon {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    width: 40px;
+    background: rgb(44, 44, 46);
+    justify-content: center;
+    margin-bottom: 20px;
+    border-radius: 50%;
 
     :deep(.el-icon) {
       background: rgb(44 44 46);
@@ -120,7 +132,7 @@ export default {
       border-radius: 100px;
     }
 
-    
+
   }
 
   .name1 {
@@ -190,6 +202,7 @@ export default {
     // height: 460px;
     padding: 0 15px;
     padding-bottom: 106px;
+    padding-top: 30px;
 
     .name1 {
 
@@ -247,4 +260,5 @@ export default {
     }
 
   }
-}</style>
+}
+</style>

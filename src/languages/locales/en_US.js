@@ -9,12 +9,16 @@ export default {
     handlingfee: "Handling fee",
     Insufficient: "Insufficient funds",
     sure1: "Cross-chain",
+ 
     record: {
       title: "Cross-chain records",
       name1: "Time",
       coin: "Token",
       send: "Sender",
+      total:"Amount",
       receive: "Receiver",
+      sourcehash:"Txn Hash",
+      fee:"Txn Fee",
       state: {
         name: "Status",
         error: "Failed",

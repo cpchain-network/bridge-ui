@@ -10,12 +10,16 @@ export default {
     handlingfee:"手续费",
     Insufficient:"资金不足",
     sure1:"跨链",
+   
     record:{
       title :"跨链记录",
       name1:"时间",
       coin:"代币",
       send:"发出方",
+      total:"金额",
       receive:"接收方",
+      sourcehash:"交易哈希",
+      fee:"手续费",
       state:{
         name:"状态",
         error:"失败",
