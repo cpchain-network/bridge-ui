@@ -693,12 +693,12 @@ if (chain.value?.id !== fromChain.value.chainId) {
     console.log('桥接成功:', result)
     
     // 桥接成功后的处理
-    ElMessage({
-      message: '桥接交易提交成功！',
-      type: 'success',
-      duration: 3000,
-      showClose: true
-    })
+    // ElMessage({
+    //   message: '桥接交易提交成功！',
+    //   type: 'success',
+    //   duration: 3000,
+    //   showClose: true
+    // })
     
     // 重置表单
     amount.value = ''
@@ -719,12 +719,12 @@ if (chain.value?.id !== fromChain.value.chainId) {
       errorMessage = error.message
     }
     
-    ElMessage({
-      message: errorMessage,
-      type: 'error',
-      duration: 3000,
-      showClose: true
-    })
+    // ElMessage({
+    //   message: errorMessage,
+    //   type: 'error',
+    //   duration: 3000,
+    //   showClose: true
+    // })
   } finally {
     isProcessing.value = false
   }
