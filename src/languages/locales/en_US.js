@@ -1,12 +1,12 @@
 export default {
   link: {
     titel: "Connect a Wallet",
-    exit: "exit！"
+    exit: "Disconnect"
   },
   bridge: {
     title: "Cross-chain anytime, anywhere, with ease",
     Available: "Available",
-    handlingfee: "Handling fee",
+    handlingfee: "fee",
     Insufficient: "Insufficient funds",
     sure1: "Cross-chain",
  
@@ -39,9 +39,8 @@ export default {
     time: "Transfer time",
     fee: "Fee",
     continues: "Continue"
-  }
-  ,
-  notice: {
+  },
+  notice:{
     title: 'Feature Under Development',
     subtitle: 'We are working hard to build new features and bring you an even better experience',
     soon: 'Stay tuned · Exciting things coming soon',
@@ -53,7 +52,7 @@ export default {
       menu: {
         name1: 'Mainnet',
         name2: 'Testnet',
-
+      
       }
     },
     meun2: {
@@ -104,8 +103,9 @@ export default {
       Korean: "韩语",
       Japanese: "日语"
     },
-    link: "Connect"
-
+    link: "Connect",
+    warining:"Multiple wallet extensions detected in your browser. Please keep only one!",
+    add:"Please enable this plugin!"
   },
 
   "blockOne": {
@@ -143,25 +143,25 @@ export default {
     title: "CP Chain Roadmap",
     blockOne: {
       title: "2025 Q3 - Q4",
-      silde: "Infrastructure construction and ecological start-up",
+      silde:"Infrastructure construction and ecological start-up",
       name1: "Mainnet officially launched",
       name2: "Token issuance and transaction support",
       name3: "Launch global node plan ",
       name4: "The first batch of ecological support plan",
-
+     
     },
     blockTwo: {
       title: "2026 Q1 - Q2",
-      silde: "Ecosystem expansion and value capture",
+      silde:"Ecosystem expansion and value capture",
       name1: "Ecological project diversity and continuous growth",
       name2: "Open CEX fee channel and repurchase channel ",
       name3: "Release API/SDK to build developer ecosystem ",
       name4: "Launch decentralized governance mechanism",
 
     },
-    blockThree: {
+    blockThree:{
       title: "2026 Q3 - Future",
-      silde: "Global brands and disruptive applications",
+      silde:"Global brands and disruptive applications",
       // 从网络到市场，释放真实价值
       name1: "Access to mainstream finance and derivatives",
       name2: "Accelerate the implementation of CP Chain in the real industry ",
@@ -205,7 +205,7 @@ export default {
     content1: {
       title: "Network",
       name1: "Mainnet",
-      name2: "Testnet"
+      name2:"Testnet"
     },
     content2: {
       title: "Ecosystem",
@@ -225,7 +225,7 @@ export default {
       name1: "Swap",
       name2: "Faucet",
       name3: "Batch transfer",
-
+      
       name4: "Bridge",
       name5: "Minting",
     }
@@ -245,5 +245,24 @@ export default {
   login: {
     "personal_center": "personal center",
     "sign_out": "sign out"
+  },
+  swap: {
+    title: "Swap on  CP Chain",
+    sell: "Sell",
+    buy: "Buy",
+    balance: "Balance",
+    rateWarn: "Minimum received after slippage",
+    rate: "Current rate",
+    nofund: "Insufficient balance",
+    setSlip: "Slippage setting",
+    setSliptitle: "Set slippage tolerance",
+    selicons: "Select token",
+    basicons: "Popular tokens",
+    searchicons: "Search tokens",
+    doswaps: "Swap",
+    prohibitReasons: "Amount too large, exceeds pool liquidity",
+    sure: "Confirm"
+    
   }
+  
 };

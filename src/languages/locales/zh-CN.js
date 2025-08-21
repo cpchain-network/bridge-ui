@@ -2,7 +2,7 @@ export default {
 
   link: {
     titel: "链接钱包",
-    exit: "退出！"
+    exit: "断开链接"
   },
   bridge:{
     title:"随随时随地轻轻松松跨链",
@@ -107,7 +107,9 @@ export default {
       Korean: "韩语",
       Japanese: "日语"
     },
-    link: "连接钱包"
+    link: "连接钱包",
+    warining:"检测到浏览器里有多个钱包插件,请保留一个!",
+    add:"请启用该插件!"
 
   },
   blockOne: {
@@ -256,5 +258,22 @@ export default {
   login: {
     "personal_center": "个人中心",
     "sign_out": "退出"
+  },
+  swap :{
+    title:"随时随地，轻松兑换",
+    sell:"出售",
+    buy:"购买",
+    balance:"余额",
+    rateWarn:"滑点后最小可得",
+    rate:"当前汇率",
+    nofund:"余额不足",
+    setSlip:"滑点设置",
+    setSliptitle:"设置交易滑点",
+    selicons:"选择币种",
+    basicons:"常用币种",
+    searchicons:"搜索币种",
+    doswaps:"兑换",
+    prohibitReasons:"输入金额过大，超过池子可兑换额度",
+    sure:"确定"
   }
 };

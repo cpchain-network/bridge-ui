@@ -1,20 +1,15 @@
-import Vue from 'vue';
-import VueI18n from 'vue-i18n';
+import { createI18n } from 'vue-i18n'
+import zhCN from './locales/zh-CN'
+import enUS from './locales/en_US'
 
-// 安装插件
-Vue.use(VueI18n);
-
-// 语言包
-import zhCN from './locales/zh-CN';
-import enUS from './locales/en_US';
-
-// 实例化 i18n
-const i18n = new VueI18n({
-  locale: window.localStorage.getItem("locale")|| 'en-us',  // 默认语言
+const i18n = createI18n({
+  legacy: false,
+      locale: 'en-us', // 默认显示语言
+    // locale: 'zh-cn',
   messages: {
     'zh-cn': zhCN,
     'en-us': enUS
   }
-});
-
+})
+document.documentElement.setAttribute('data-lang', "en-us"); 
 export default i18n;

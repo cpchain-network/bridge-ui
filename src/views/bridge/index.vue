@@ -1,0 +1,2212 @@
+<template>
+  <div class="bridge">
+    <!--  <img :src="`/src/assets/images/chain/${fromChain.img}`"> -->
+    <div class="swap-container" v-if="bridgeStep === 1">
+      <h1>
+        {{ $t('bridge.title') }}
+      </h1>
+      <div class="content">
+        <div class="item">
+          <div class="chain-card left" @click="showChain(1)">
+            <div>
+              <img :src="getImageUrl(fromChain.img)" alt="">
+            </div>
+            <div>
+              <div class="label" style="text-align: left;"> {{ $t('bridge.from') }}</div>
+              <div class="name">{{ fromChain.name }}</div>
+            </div>
+          </div>
+          <div class="arrow-wrap" @click="switchChains()">
+            <span class="arrow">→</span>
+          </div>
+          <div class="chain-card right" @click="showChain(2)">
+
+            <div>
+              <div class="label" style="text-align: right;">{{ $t('bridge.to') }}</div>
+              <div class="name">{{ toChain.name }}</div>
+            </div>
+            <div>
+              <img :src="getImageUrl(toChain.img)"
+              alt="">
+            </div>
+          </div>
+        </div>
+
+        <div class="amount-card">
+          <!-- 左侧 -->
+          <div class="amount-main">
+            <div class="amount-value">
+              <input type="number" placeholder="at  least 0.001" v-model="amount" />
+              <!-- <div class="max-btn" @click="setMax">Max</div> -->
+            </div>
+            <!-- <div class="amount-usd">$25.26</div> -->
+          </div>
+          <!-- 右侧 -->
+          <div class="amount-side">
+            <div class="token-selector" @click="showCoin()">
+
+              <img :src="getImageUrl_1(coinChoose.img)"
+              class="token-icon" />
+              <span>{{ coinChoose.name }}</span>
+              <svg class="arrow" width="16" height="16" viewBox="0 0 20 20">
+                <path d="M6 8l4 4 4-4" stroke="#aaa" stroke-width="2" fill="none" stroke-linecap="round" />
+              </svg>
+            </div>
+            <div class="amount-avail">{{ $t('bridge.Available') }}
+              <img src="@/assets/images/bridge/loading-gray.svg" v-if="isLoadingBalance" alt="">
+              <span v-else>
+                &nbsp;{{ fromBalance }}{{ coinChoose.name }}
+              </span>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <div class="summary-main">
+            <img class="summary-icon" 
+            :src="getImageUrl_1(coinChoose.img)"
+           alt="ETH" />
+            <div class="summary-info">
+              <div class="summary-amt">{{ bridgeAmount }}{{ coinChoose.name }}</div>
+              <!-- <div class="summary-usd">$25.26</div> -->
+            </div>
+          </div>
+          <div class="summary-bottom">
+            <div class="summary-fee">{{ $t('bridge.handlingfee') }}
+
+              <img v-if="isloadingGas" src="@/assets/images/bridge/loading-gray.svg" alt="">
+              <span v-else> ${{ allusdtFees }}({{ allbridgeFees }}{{ coinChoose.name }})</span>
+            </div>
+            <div class="summary-time">
+              3~10 mins
+              <svg width="15" height="15" class="clock" viewBox="0 0 20 20">
+                <circle cx="10" cy="10" r="8" stroke="#a0a0a0" stroke-width="1.5" fill="none" />
+                <line x1="10" y1="10" x2="10" y2="6" stroke="#a0a0a0" stroke-width="1.2" stroke-linecap="round" />
+                <line x1="10" y1="10" x2="13.3" y2="12.1" stroke="#a0a0a0" stroke-width="1.2" stroke-linecap="round" />
+              </svg>
+            </div>
+          </div>
+
+        </div>
+        <div id="gascontainer">
+
+        </div>
+        <button class="submit-btn" :disabled="!isInsufficient" @click="tab(2)">
+          <span v-if="!isInsufficient"> {{ $t('bridge.Insufficient') }} </span>
+          <span v-else>{{ $t('bridge.Crosschain') }}</span>
+        </button>
+      </div>
+    </div>
+
+
+    <div class="confirm-modal" v-if="bridgeStep === 2">
+      <!-- 顶部标题与关闭 -->
+      <div class="modal-header">
+        <el-icon style="color: #fff;cursor: pointer;" @click="tab(1)">
+          <Back />
+        </el-icon>
+        <!-- <i class="el-icon-back" style="color: #fff;cursor: pointer;" @click="tab(1)"></i> -->
+        <span class="modal-title"> {{ $t('bridge.sureTitle') }}</span>
+        <span class="close-btn" @click="$emit('close')">×</span>
+      </div>
+      <!-- 资产1 -->
+      <div class="modal-block">
+        <div class="block-row">
+          <div class="block-chain">
+            <img :src="getImageUrl(fromChain.img)" class="block-icon" alt="">
+            <span class="block-label">{{ $t('bridge.from') }}&nbsp;{{ fromChain.name }}&nbsp;{{ $t('bridge.Crosschain')
+            }}</span>
+          </div>
+          <span class="block-addr"> {{ ellipsisFilter(address) }}</span>
+        </div>
+        <div class="block-amount">
+          <img 
+          :src="getImageUrl_1(coinChoose.img)"
+          class="amount-icon" alt="">
+          <span class="amount-value">{{ amount }} {{ coinChoose.name }}</span>
+        </div>
+      </div>
+      <!-- 资产2 -->
+      <div class="modal-block">
+        <div class="block-row">
+          <div class="block-chain">
+            <img  class="block-icon"   :src="getImageUrl(toChain.img)" alt="">
+            <span class="block-label">{{ toChain.name }}{{ $t('bridge.get') }}</span>
+          </div>
+          <span class="block-addr"> {{ ellipsisFilter(address) }}</span>
+        </div>
+        <div class="block-amount">
+          <img  :src="getImageUrl_1(coinChoose.img)" class="amount-icon" alt="">
+          <span class="amount-value">{{ bridgeAmount }} {{ coinChoose.name }}</span>
+        </div>
+      </div>
+      <!-- 信息明细 -->
+      <div class="modal-info">
+        <div class="info-row">
+          <span class="info-label">{{ $t('bridge.cross') }}</span>
+          <span class="info-value">{{ $t('bridge.crossName') }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">{{ $t('bridge.time') }}</span>
+          <span class="info-value">3~10mins</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">{{ $t('bridge.fee') }}</span>
+          <span class="info-value">${{ allusdtFees }}({{ allbridgeFees }}{{ coinChoose.name }})</span>
+        </div>
+      </div>
+      <!-- 底部按钮 222-->
+      <button class="modal-btn" :disabled="isProcessing" @click="bridgeMethod">
+        <img src="@/assets/images/bridge/loading.svg" v-if="isProcessing" alt="">
+        <span v-else>{{ $t('bridge.continues') }}</span>
+      </button>
+    </div>
+
+
+    <!--  选择链弹窗 -->
+    <div class="chain-select-modal" v-if="showModal">
+      <div class="chain-select-content">
+        <div class="header">
+          <span>Select  Chain</span>
+          <span class="close-btn" @click="handleClose">✕</span>
+        </div>
+        <div class="search-box">
+          <input v-model="search" type="text" :placeholder="$t('bridge.search')" @input="fliterChain()" />
+        </div>
+
+        <div class="chain-list">
+          <div v-for="chain in chains" :key="chain.id" class="chain-item" :class="{ active: chain.name === selected }"
+            @click="select(chain)">
+            <!-- <img :src="require(`@/assets/imgs/chain/${chain.img}`)" class="chain-icon" alt="" /> -->
+            <img :src="getImageUrl(chain.img)" alt="" class="chain-icon">
+            <span class="chain-name">{{ chain.name }}</span>
+            <span v-if="chain.chainId === selected.chainId" class="check-mark">✔</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--  选择币 -->
+
+
+    <div class="chain-select-modal" v-if="showModal2">
+      <div class="chain-select-content">
+        <div class="header">
+          <span>Select  Coin</span>
+          <span class="close-btn" @click="showModal2 = false">✕</span>
+        </div>
+        <div class="search-box">
+          <input v-model="search2" type="text" :placeholder="$t('bridge.search')" @input="fliterCoin()" />
+        </div>
+
+        <div class="chain-list">
+          <div v-for="coin in allCoinList" :key="coin.name" class="chain-item"
+            :class="{ active: coin.name === coinChoose.name }" @click="select2(coin)">
+            <img :src="getImageUrl_1(coin.img)" alt="" class="chain-icon">
+            
+
+            <span class="chain-name">{{ coin.name }}</span>
+            <span v-if="coin.name === coinChoose.name" class="check-mark">✔</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</template>
+
+<script setup>
+import {
+  ethers, Network, JsonRpcProvider, formatUnits,
+
+} from 'ethers';
+import { ref, onMounted, watch, computed } from "vue"
+import erc20ABI from "@/assets/abi/erc20ABI"
+import bridge from "@/assets/abi/bridgeABI"
+const bridgeABI = bridge.abi
+import { parseEther } from 'viem'
+import BigNumber from 'bignumber.js';
+import networks from "../../assets/json/networks.json"
+import { getbridgeFees } from "@/api/bridgePrice"
+// 在 <script setup> 部分的导入区域添加
+import { ElMessage } from 'element-plus'
+console.log(networks)
+function getImageUrl(fileName) {
+  return new URL(`/src/assets/images/chain/${fileName}`, import.meta.url).href
+}
+function getImageUrl_1(fileName) {
+  return new URL(`/src/assets/images/coin/${fileName}`, import.meta.url).href
+}
+const coinList = [
+  {
+    img: "eth.svg",
+    name: "ETH",
+    minBridgeAmount: 0.001
+  }, {
+    img: "usdt.png",
+    name: "USDT",
+    minBridgeAmount: 0.001
+  },
+ 
+  {
+    img: "cp.svg",
+    name: "CP",
+    minBridgeAmount: 0.001
+  },
+
+
+]
+
+const TOKEN_DECIMALS = {
+  ETH: 18,
+  USDT: 6,
+  USDC: 6,
+  DAI: 18,
+  WBTC: 8
+};
+import { switchChain } from '@wagmi/core'
+import {
+  useChainId, useConnect, useDisconnect, useAccount, useAccountEffect, useWriteContract,
+  useReadContract,
+  useWaitForTransactionReceipt
+} from '@wagmi/vue'
+
+const { connect, connectors, error } = useConnect();
+const { address, status, chain } = useAccount()
+import { config } from '../../wagmi.ts' // 确保路径正确
+import axios from "axios"
+// 在 script setup 的导入部分添加
+import { bridgeMethodOptimized } from './bridgeCore.js'
+const pageNumber = ref(1)
+
+const pageSize = ref(10)
+const Total = ref(0)
+const isloadingGas = ref(false)
+const records = ref([])
+
+const allusdtFees = ref(0)
+const allbridgeFees = ref(0)
+const showModal = ref(false)
+const showModal2 = ref(false)
+const selected = ref("cp")
+const search = ref("")
+const search2 = ref("")
+const chains = ref(networks)
+const fromBalance = ref(0)
+const toBalance = ref(0)
+const fromChain = ref(networks[0])
+const toChain = ref(networks[1])
+const state = ref()
+
+const feeDesc = ref(`Sender pays a 0.001% \n\n trading fee for each transfer`)
+const bridgeFee = ref(0.0001)
+const amount = ref(null)
+
+const bridgeAmount = ref() // bridge after amount
+
+const dialogVisible = ref(false)
+const coinChooseVisible = ref(false)
+const selectedOption = ref(null)
+const Visible = ref(true)
+const isLoadingBalance = ref(false)
+const position = ref('')
+const bridgeStep = ref(1)
+const pageIndex = ref(1)
+
+const isProcessing = ref(false)
+const minBridgeAmount = ref(0.001)
+const gasFeeEthStr = ref('')
+const coinChoose = ref({
+  img: "eth.svg",
+  name: "ETH",
+  minBridgeAmount: 0.001
+})
+
+const allCoinList = ref([
+  {
+    img: "eth.svg",
+    name: "ETH",
+    minBridgeAmount: 0.001
+  },
+  {
+    img: "usdt.svg",
+    name: "USDT",
+    minBridgeAmount: 0.001
+  },
+ 
+  {
+    img: "cp.svg",
+    name: "CP",
+    minBridgeAmount: 0.001
+  }
+])
+const txHash = ref('')
+const approvalHash = ref('')
+const isInsufficient = computed(() => {
+  return Number(fromBalance.value) >= Number(coinChoose.value.minBridgeAmount) &&
+    Number(fromBalance.value) >= Number(amount.value)
+})
+watch(amount, (newValue, oldValue) => {
+  // validatePositiveNumber(newValue, oldValue)
+
+  // 保留5位精度，向下取整
+  const result = Math.floor(newValue * (1 - allbridgeFees.value) * 100000) / 100000
+  bridgeAmount.value = result.toFixed(5)
+})
+
+watch(
+  chain,
+  (newChain, oldChain) => {
+    if (newChain?.id !== oldChain?.id) {
+      console.log('网络已切换:', oldChain?.id, '->', newChain?.id)
+      // 网络切换后重新获取余额
+      if (address.value) {
+        initBridgeBalance()
+      }
+    }
+  },
+  { deep: true }
+)
+function getIconUrl(filename) {
+  return new URL(`../assets/images/chain/${filename}`, import.meta.url).href
+}
+
+
+function showChain(state1) {
+  showModal.value = true
+  state.value = state1
+  //  console.log(state)
+  chains.value = networks
+  search.value = ""
+
+
+
+}
+function ellipsisFilter(value) {
+  if (typeof value !== 'string') return value;
+
+  const startPart = value.slice(0, 4);
+  const endPart = value.slice(-4);
+  return `${startPart}...${endPart}`;
+}
+async function switchToNetwork(chainId) {
+  try {
+    await switchChain(config, { chainId })
+    console.log('网络切换成功')
+  } catch (error) {
+    console.error('网络切换失败', error)
+  }
+}
+
+function switchChains() {
+  // 交换 UI 上的 fromChain 和 toChain
+  let a = fromChain.value
+  let b = toChain.value
+  let temp = { ...a }
+  Object.assign(a, b)
+  Object.assign(b, temp)
+
+
+
+  // 初始化桥接余额
+  initBridgeBalance()
+}
+function tab(item) {
+  // const { chainId } = useWeb3ModalAccount()
+  // if (chainId && chainId?.value !== this.fromChain?.chainId) {
+
+  //   await this.switchNet(this.fromChain)
+  //   return
+  // }
+  bridgeStep.value = item
+}
+function fliterChain() {
+  var arr = chains.value.filter(
+    c =>
+      c.name.toLowerCase().includes(search.value.toLowerCase().trim())
+
+  );
+
+
+  chains.value = arr
+
+  if (search.value.toLowerCase().trim() === "") {
+    chains.value = networks
+  }
+
+}
+
+function fliterCoin() {
+  var arr = allCoinList.value.filter(
+    c =>
+      c.name.toLowerCase().includes(search2.value.toLowerCase().trim())
+
+  );
+
+
+  allCoinList.value = arr
+
+  if (search2.value.toLowerCase().trim() === "") {
+    allCoinList.value = coinList
+  }
+}
+function handleClose() {
+  showModal.value = false;
+  search.value = "";
+}
+function showCoin() {
+  // console.log(coinList.value)
+  allCoinList.value = coinList
+  showModal2.value = true
+  search2.value = ""
+}
+function initEthers(url, chainId) {
+  let provider;
+  if (chainId === 43851) {
+    provider = new JsonRpcProvider(url, chainId, { staticNetwork: true })
+  } else {
+    provider = new JsonRpcProvider(url, chainId)
+  }
+  return provider;
+}
+onMounted(() => {
+  
+})
+watch(
+  status,
+  (newStatus) => {
+    if (newStatus === "connected" || newStatus === "disconnected") {
+      initBridgeBalance()
+ 
+    }
+    if (newStatus === "disconnected") {
+      amount.value=''
+    }
+  }
+)
+async function getTokenBalance({ provider, address, chainInfo, tokenName }) {
+  const isCpChain = chainInfo.chainId === 86606;
+  const token = tokenName.toUpperCase();
+  const nativeToken = chainInfo.currency.toUpperCase();
+
+  try {
+    // ✅ 情况 1：原生币（如 ETH、CP），且不是 CP 链上的 ETH
+    if (token === nativeToken && !(isCpChain && token === 'ETH')) {
+      const balance = await provider.getBalance(address);
+      console.log(`[原生币] ${token} - 余额:`, balance.toString());
+      return parseFloat(ethers.formatEther(balance)).toFixed(6);
+    }
+
+    // ✅ 情况 2：CP链上的 ETH，走 ethContract 查询
+    if (isCpChain && token === 'ETH') {
+      console.log(chainInfo)
+      const ethContract = chainInfo.ethContract;
+      if (!ethContract) {
+        console.warn(`[警告] CP链未配置 ETH 合约地址`);
+        return '0.000000';
+      }
+      console.log(`[CP链 ETH] 通过合约 ${ethContract} 查询`);
+      const contract = new ethers.Contract(ethContract, erc20ABI, provider);
+      const balance = await contract.balanceOf(address);
+      return parseFloat(ethers.formatEther(balance)).toFixed(6);
+    }
+
+    // ✅ 情况 3：普通 ERC20 代币
+    const contractKey = token.toLowerCase() + 'Contract';
+    const erc20Addr = chainInfo[contractKey];
+
+    if (!erc20Addr) {
+      console.warn(`[警告] ${token} 未配置合约地址于链 ${chainInfo.name}`);
+      return '0.000000';
+    }
+
+    console.log(`[ERC20] ${token} 合约地址: ${erc20Addr}`);
+    const contract = new ethers.Contract(erc20Addr, erc20ABI, provider);
+    const balance = await contract.balanceOf(address);
+    return parseFloat(ethers.formatEther(balance)).toFixed(6);
+  } catch (err) {
+    console.error(`[错误] 查询 ${token} 余额失败:`, err);
+    return '0.000000';
+  }
+}
+
+async function initBridgeBalance() {
+  if (!address.value) return
+
+  console.log('地址:', address.value)
+
+  fromBalance.value = '0.000000'
+  toBalance.value = '0.000000'
+  isLoadingBalance.value = true
+
+  try {
+    const providerFrom = await initEthers(fromChain.value.rpcUrl, fromChain.value.chainId)
+    const providerTo = await initEthers(toChain.value.rpcUrl, toChain.value.chainId)
+
+    // ✅ 处理 fromBalance
+    fromBalance.value = await getTokenBalance({
+      provider: providerFrom,
+      address: address.value,
+      chainInfo: fromChain.value,
+      tokenName: coinChoose.value.name
+    })
+    console.log('fromBalance:', fromBalance.value)
+
+    // ✅ 处理 toBalance
+    toBalance.value = await getTokenBalance({
+      provider: providerTo,
+      address: address.value,
+      chainInfo: toChain.value,
+      tokenName: coinChoose.value.name
+    })
+    console.log('toBalance:', toBalance.value)
+
+  } catch (err) {
+    console.error('initBridgeBalance error:', err)
+  }
+
+  isLoadingBalance.value = false
+  getBridgeFees()
+}
+
+
+const bridgeMethod = async () => {
+  console.log("bridgeMethod 被调用", coinChoose.value.name);
+   console.log(chain.value?.id)
+  console.log(fromChain.value.chainId)
+  if (!address.value) {
+    ElMessage({
+      message: '请先连接钱包',
+      type: 'warning',
+      duration: 2000,
+      showClose: true
+    })
+    return
+  }
+  
+  if (!amount.value || Number(amount.value) <= 0) {
+    ElMessage({
+      message: '请输入有效的桥接金额',
+      type: 'warning',
+      duration: 2000,
+      showClose: true
+    })
+    return
+  }
+  
+  if (Number(amount.value) < coinChoose.value.minBridgeAmount) {
+    ElMessage({
+      message: `最小桥接金额为 ${coinChoose.value.minBridgeAmount} ${coinChoose.value.name}`,
+      type: 'warning',
+      duration: 2000,
+      showClose: true
+    })
+    return
+  }
+  
+  if (Number(fromBalance.value) < Number(amount.value)) {
+    ElMessage({
+      message: '余额不足',
+      type: 'warning',
+      duration: 2000,
+      showClose: true
+    })
+    return
+  }
+  
+
+  // 检查当前链是否正确
+if (chain.value?.id !== fromChain.value.chainId) {
+  try {
+    console.log("切换网络 ------")
+    await switchToNetwork(fromChain.value.chainId)
+    
+    // 等待一小段时间让 chain.value 更新
+    await new Promise(resolve => setTimeout(resolve, 500))
+    
+    // 二次验证网络是否切换成功
+    if (chain.value?.id !== fromChain.value.chainId) {
+      throw new Error('网络切换失败，当前网络与目标网络不匹配')
+    }
+    
+    console.log('网络切换验证成功')
+  } catch (error) {
+    console.error('网络切换失败:', error)
+    ElMessage({
+      message: '请切换到正确的网络',
+      type: 'error',
+      duration: 2000,
+      showClose: true
+    })
+    return
+  }
+}
+  isProcessing.value = true
+  
+  try {
+    // 获取代币地址
+    let tokenAddress = null
+    if (coinChoose.value.name !== "ETH" && coinChoose.value.name !== "CP") {
+      const contractKey = coinChoose.value.name.toLowerCase() + 'Contract'
+      tokenAddress = fromChain.value[contractKey]
+      
+      if (!tokenAddress) {
+        throw new Error(`${coinChoose.value.name} 合约地址未配置`)
+      }
+    }
+    
+    // 获取目标链的 nativeTokenContract 作为 destTokenAddress
+    const destTokenAddress = toChain.value.nativeTokenContract
+    if (!destTokenAddress) {
+      throw new Error('目标链 nativeTokenContract 未配置')
+    }
+    
+    // 转换金额为 wei
+    const amountInWei = parseEther(amount.value.toString())
+    
+    // 获取桥接合约地址
+    const bridgeContractAddress = fromChain.value.bridgeContract
+    if (!bridgeContractAddress) {
+      throw new Error('桥接合约地址未配置')
+    }
+    
+    // 调用桥接核心函数
+    const result = await bridgeMethodOptimized({
+      tokenName: coinChoose.value.name,
+      tokenAddress: tokenAddress,
+      amount: amountInWei,
+      userAddress: address.value,
+      bridgeContractAddress: bridgeContractAddress,
+      fromChainId: fromChain.value.chainId,
+      targetChainId: toChain.value.chainId,
+      destTokenAddress: destTokenAddress, // 添加目标链的 nativeTokenContract
+      setTxHash: (hash) => {
+        console.log('桥接交易哈希:', hash)
+        // 可以在这里更新 UI 状态
+      },
+      setApprovalHash: (hash) => {
+        console.log('授权交易哈希:', hash)
+        // 可以在这里更新 UI 状态
+      }
+    })
+    
+    console.log('桥接成功:', result)
+    
+    // 桥接成功后的处理
+    ElMessage({
+      message: '桥接交易提交成功！',
+      type: 'success',
+      duration: 3000,
+      showClose: true
+    })
+    
+    // 重置表单
+    amount.value = ''
+    bridgeStep.value = 1
+    
+    // 刷新余额
+    await initBridgeBalance()
+    
+  } catch (error) {
+    console.error('桥接失败:', error)
+    
+    let errorMessage = '桥接失败'
+    if (error.message.includes('User rejected')) {
+      errorMessage = '用户取消了交易'
+    } else if (error.message.includes('insufficient funds')) {
+      errorMessage = '余额不足'
+    } else if (error.message) {
+      errorMessage = error.message
+    }
+    
+    ElMessage({
+      message: errorMessage,
+      type: 'error',
+      duration: 3000,
+      showClose: true
+    })
+  } finally {
+    isProcessing.value = false
+  }
+};
+async function getBridgeFees() {
+
+
+  isloadingGas.value = true
+
+  allusdtFees.value = ""
+  allbridgeFees.value = ""
+  var chainId = toChain.value.chainId
+  var symbol = coinChoose.value.name.toLowerCase()
+  var result = await getbridgeFees(chainId, symbol)
+  allbridgeFees.value = result.data.predict_fee
+  // console.log(allbridgeFees)
+  // this.allusdtFees =
+  allusdtFees.value = calculateMarketPriceTimesFee(result.data.market_price, result.data.predict_fee)
+  isloadingGas.value = false
+  // this.allbridgeFees = result
+
+}
+
+function calculateMarketPriceTimesFee(market_price_str, predict_fee_str) {
+  const predict_fee = new BigNumber(predict_fee_str);
+  const market_price = new BigNumber(market_price_str);
+
+  const result = predict_fee.multipliedBy(market_price);
+
+  return result.toFixed(6);  // 保留 
+}
+function select(val) {
+
+  selected.value = val;
+  handleClose();
+  if (val.chainId == fromChain.value.chainId || val.chainId == toChain.value.chainId) {
+    switchChains()
+    initBridgeBalance()
+    return
+  }
+  if (state.value == 1 && val.chainId != fromChain.value.chainId) {
+    fromChain.value = selected.value
+
+    initBridgeBalance()
+  }
+  if (state.value == 2 && val.chainId != toChain.value.chainId) {
+    toChain.value = selected.value
+    initBridgeBalance()
+  }
+
+
+
+}
+
+
+
+function select2(val) {
+  console.log(val)
+  coinChoose.value = val
+  showModal2.value = false
+  initBridgeBalance()
+
+}
+</script>
+
+
+<style lang="scss" scoped>
+.bridge {
+  background: #121212 url("../../assets/faucet_bg.png") no-repeat;
+  background-size: 100% 100%;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  align-items: center;
+
+  button:disabled {
+    cursor: not-allowed
+      /* ... */
+  }
+
+  :deep(.el-pager li) {
+    background: transparent;
+    color: #fff;
+  }
+
+  :deep(.el-pagination button:disabled) {
+    background: transparent;
+  }
+
+  :deep(.el-pagination .btn-next) {
+    background: transparent;
+  }
+
+  :deep(.el-pagination .btn-prev) {
+    background: transparent !important;
+  }
+
+  :deep(.el-pager li.active) {
+    color: #00CE7A;
+  }
+
+  .pagination {
+    height: 60px;
+    padding-top: 30px;
+    text-align: right;
+  }
+
+  #gascontainer {
+
+    padding-left: 16px;
+
+    display: flex;
+    // justify-content: center;
+    align-items: center;
+
+    span {
+      font-size: 12px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+      color: #8E8E92;
+    }
+
+    img {
+      width: 20px;
+      animation: rotate 5s linear infinite;
+    }
+  }
+
+
+
+  .swap-container {
+    max-width: 480px;
+    height: 550px;
+    margin: 0 auto;
+    width: 100%;
+
+    h1 {
+      color: #FFF;
+      text-align: center;
+
+      font-size: 40px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: normal;
+      margin-bottom: 32px;
+    }
+
+    .content {
+      padding: 16px;
+      max-width: 480px;
+      // height: 450px;
+      border-radius: 24px;
+      background: #1E1E1E;
+
+      .item {
+        position: relative;
+        margin-bottom: 16px;
+        justify-content: space-between;
+
+        .arrow-wrap {
+          cursor: pointer;
+          width: 32px;
+          height: 32px;
+          background: #1E1E1E;
+          border: 1.6px solid #2E2F32;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          // margin: 0 -19px; // 向两侧溢出半径
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translateX(-50%) translateY(-50%);
+          //    transform: translateY(-50%);
+          z-index: 2;
+          box-shadow: 0 1px 8px #0002 inset;
+
+        }
+
+        .arrow {
+          color: #00CE7A;
+          font-size: 14px;
+          font-weight: 700;
+          display: inline-block;
+          transform: translateY(-1px);
+        }
+
+        display: flex;
+        // justify-content: space-around;
+
+        .chain-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          background: none;
+          padding: 0;
+          margin: 0;
+          width: 100%;
+          position: relative;
+          z-index: 1;
+          margin-bottom: 8px;
+        }
+
+        .chain-card {
+          cursor: pointer;
+          // flex: 1 1 0%;
+          background: #1E1E1E;
+          border-radius: 20px;
+          padding: 16px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          height: 72px;
+          border: 1px solid #2E2F32;
+          box-sizing: border-box;
+          min-width: 0;
+          transition: box-shadow 0.2s;
+
+          img {
+            width: 40px;
+            display: block;
+          }
+
+          &.left {
+            width: calc(50% - 5px);
+            // margin-right: 34px;
+            justify-content: flex-start;
+          }
+
+          &.right {
+            width: calc(50% - 5px);
+            justify-content: flex-end;
+          }
+
+          .icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            object-fit: contain;
+            background: #191b20;
+            box-shadow: 0 1px 6px #15151522 inset;
+          }
+
+          .label {
+            color: #8E8E92;
+            // text-align: center;
+
+            font-size: 14px;
+            font-style: normal;
+            font-weight: 500;
+            line-height: normal;
+          }
+
+          .name {
+            color: var(---, #FFF);
+
+            font-size: 14px;
+            font-style: normal;
+            font-weight: 500;
+            line-height: normal;
+          }
+        }
+      }
+
+      .amount-card {
+        background: #1E1E1E;
+        border: 1px solid #2E2F32;
+        border-radius: 20px;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        padding: 16px;
+        margin-bottom: 16px;
+        width: 100%;
+        box-sizing: border-box;
+        height: 99px;
+        position: relative;
+
+        .amount-main {
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-start;
+          flex: 1;
+
+          .amount-value {
+            color: #FFF;
+
+            font-size: 32px;
+            font-style: normal;
+            font-weight: 600;
+            line-height: normal;
+
+            input[type="number"]::-webkit-outer-spin-button,
+            input[type="number"]::-webkit-inner-spin-button {
+              -webkit-appearance: none;
+              margin: 0;
+            }
+
+            input[type="number"] {
+              -moz-appearance: textfield;
+              /* 可选：再加上自己需要的样式 */
+              /* appearance: textfield; */
+              /* 新标准也支持，但兼容性有限 */
+            }
+
+            input {
+              border: 0;
+              outline: none;
+              background: transparent;
+              color: #FFF;
+              width: 200px;
+              // text-align: center;
+              // font-family: "TT Hoves Pro Trial";
+              font-size: 32px;
+              font-style: normal;
+              font-weight: 600;
+              line-height: normal;
+            }
+          }
+
+          .amount-usd {
+            color: #FFF;
+
+            font-size: 12px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: normal;
+            // margin-top: 5px;
+          }
+        }
+
+        .amount-side {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          justify-content: space-between;
+          height: 100%;
+          min-width: 180px;
+
+          .token-selector {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            border-radius: 100px;
+            border: 1px solid #2E2F32;
+
+            background: #151517;
+            border-radius: 24px;
+            padding: 8px 12px;
+            min-width: 72px;
+            // height: 44px;
+            font-size: 1.12rem;
+            color: #fff;
+            font-weight: 600;
+            // margin-bottom: 30px;
+            gap: 4px;
+
+            .token-icon {
+              width: 16px;
+              height: 16px;
+              border-radius: 50%;
+              background: #11df72;
+              margin-right: 6px;
+            }
+
+            span {
+              color: #FFF;
+              text-align: center;
+
+              font-size: 12px;
+              font-style: normal;
+              font-weight: 400;
+              line-height: normal;
+            }
+
+            .arrow {
+              margin-left: 8px;
+              margin-top: 2px;
+              width: 16px;
+              height: 16px;
+              display: inline-block;
+            }
+          }
+
+          .amount-avail {
+
+            color: #8E8E92;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            font-size: 12px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: normal;
+
+            img {
+              width: 20px;
+              animation: rotate 5s linear infinite;
+            }
+
+            span {
+              color: #FFF;
+
+              font-size: 12px;
+              font-style: normal;
+              font-weight: 400;
+              line-height: normal;
+            }
+          }
+        }
+      }
+
+      .summary-card {
+        background: #1E1E1E;
+        border: 1px solid #2E2F32;
+        border-radius: 20px;
+        padding: 16px;
+        width: 100%;
+        box-sizing: border-box;
+        height: 107px;
+        margin-bottom: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+
+        .summary-main {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+
+          .summary-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+
+            object-fit: cover;
+          }
+
+          .summary-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+
+            .summary-amt {
+              color: #FFF;
+
+              font-size: 24px;
+              font-style: normal;
+              font-weight: 600;
+              line-height: normal;
+            }
+
+            .summary-usd {
+              color: #FFF;
+
+              font-size: 12px;
+              font-style: normal;
+              font-weight: 400;
+              line-height: normal;
+            }
+          }
+        }
+
+        .summary-bottom {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          // margin-top: 10px;
+
+          .summary-fee {
+            display: flex;
+            color: #8E8E92;
+
+            font-size: 12px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: normal;
+
+            span {
+              color: #8E8E92;
+            }
+
+            ;
+
+            img {
+              width: 20px;
+              animation: rotate 5s linear infinite;
+            }
+          }
+
+          .summary-time {
+            color: #8E8E92;
+
+            font-size: 12px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: normal;
+
+            .clock {
+              vertical-align: middle;
+              margin-top: 1px;
+              font-size: 10px;
+            }
+          }
+        }
+      }
+
+      .submit-btn {
+        width: 100%;
+        // padding: 20px  0;
+        display: block;
+        height: 48px;
+        border: none;
+        outline: none;
+        background: #00CE7A;
+        border-radius: 999px;
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 500;
+        color: #1A1E1D;
+        cursor: pointer;
+        // margin-top: 16px;
+        transition: background 0.18s, filter 0.18s;
+
+        &:hover,
+        &:active {
+          background: #00c864;
+          filter: brightness(0.98);
+        }
+      }
+
+      .submit-btn:disabled {
+        cursor: not-allowed
+      }
+
+    }
+  }
+
+  .record {
+    width: 100%;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .container {
+      max-width: 1200px;
+      min-height: 200px;
+
+      .cross-records {
+        margin-top: 48px;
+        width: 100%;
+
+        .records-title {
+          font-size: 1.3rem;
+          font-weight: 600;
+          color: #fff;
+          margin-bottom: 20px;
+        }
+
+        .records-table {
+          border-radius: 12px;
+          overflow: hidden;
+          background: none;
+          border: none;
+          width: 100%;
+          min-width: 900px;
+          box-sizing: border-box;
+          font-size: 1.07rem;
+
+          .records-thead,
+          .records-tr {
+            display: flex;
+            align-items: center;
+            width: 100%;
+          }
+
+          .records-thead {
+            // background: #242424;
+            color: #eee;
+            font-weight: 500;
+            height: 46px;
+
+            .th {
+              flex: 1;
+              padding: 0 10px;
+              color: #8E8E92;
+              text-align: center;
+              font-size: 12px;
+              font-style: normal;
+              font-weight: 400;
+              line-height: normal;
+            }
+          }
+
+          .records-tr {
+            min-height: 48px;
+            // height: 48px;
+            // background: #191b1e;
+            color: #f2f2f2;
+            transition: background 0.15s;
+
+            .td {
+              flex: 1;
+              // text-align: center;
+              padding: 0 10px;
+              color: #FFF;
+
+              font-size: 14px;
+              font-style: normal;
+              font-weight: 500;
+              line-height: normal;
+              // white-space: nowrap;
+              // overflow: hidden;
+              // text-overflow: ellipsis;
+            }
+
+            &.alt {
+              background: #1E1E1E;
+            }
+
+            &:hover {
+              background: #1E1E1E;
+            }
+          }
+
+          .status {
+            font-weight: 500;
+
+            &.success {
+              color: #00CE7A;
+            }
+
+            &.fail {
+              color: #f4575e;
+            }
+          }
+
+          .retry-btn,
+          .detail-link {
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            background: none;
+            padding: 0;
+            color: #fff;
+            transition: text-decoration 0.15s;
+
+            &:hover {
+              color: #00CE7A;
+            }
+          }
+
+          .retry-btn {
+            color: #fff;
+          }
+
+        }
+
+        // 响应式
+        @media (max-width: 900px) {
+          .records-table {
+            min-width: 100vw;
+            font-size: 0.99rem;
+
+            .th,
+            .td {
+              padding: 0 6px;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  $modal-bg: #181A1B;
+  $modal-radius: 20px;
+  $modal-padding: 32px 28px 24px 28px;
+
+  $block-bg: #121212;
+  $block-border: #232427;
+  $block-radius: 16px;
+
+  $text-main: #fff;
+  $text-secondary: #8E8E92;
+  $primary: #00CE7A;
+  $primary-hover: #00c864;
+
+  .confirm-modal {
+    max-width: 420px;
+    width: calc(100% - 48px);
+    // margin: 100px auto 0;
+    background: #151517;
+    border-radius: $modal-radius;
+    box-shadow: 0 12px 32px #000a;
+    padding: 24px;
+    //  display: flex;
+    //  flex-direction: column;
+    //  gap: 18px;
+    // color: $text-main;
+    position: relative;
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+
+      .modal-title {
+        font-size: 20px;
+        font-style: normal;
+        font-weight: 500;
+        line-height: normal;
+        color: #fff;
+      }
+
+      .close-btn {
+        font-size: 22px;
+        color: #fff;
+
+        cursor: pointer;
+        transition: color .18s;
+
+        &:hover {
+          color: $primary;
+        }
+      }
+    }
+
+    .modal-block {
+      background: #151517;
+      border-radius: 20px;
+      border: 1px solid #2E2F32;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 8px;
+
+      .block-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        .block-chain {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+
+          .block-icon {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #222;
+          }
+
+          .block-label {
+            color: #FFF;
+
+            font-size: 12px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: normal;
+          }
+        }
+
+        .block-addr {
+          color: #FFF;
+          text-align: center;
+
+          font-size: 12px;
+          font-style: normal;
+          font-weight: 400;
+          line-height: normal;
+          border-radius: 100px;
+
+          background: #000;
+          display: inline-block;
+          padding: 2px 10px;
+        }
+      }
+
+      .block-amount {
+        // margin-top: 4px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .amount-icon {
+          width: 32px;
+          height: 32px;
+        }
+
+        .amount-value {
+          color: #FFF;
+          text-align: center;
+
+          font-size: 24px;
+          font-style: normal;
+          font-weight: 600;
+          line-height: normal;
+        }
+      }
+    }
+
+    .modal-info {
+      margin-top: 16px;
+      background: none;
+      border-radius: $block-radius;
+      border: 1px solid #27282B;
+      padding: 0 2px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+
+      .info-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 42px;
+        font-size: 15px;
+        padding: 0 16px;
+        border-bottom: 1px solid #27282B;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        .info-label {
+          color: #FFF;
+
+          font-size: 12px;
+          font-style: normal;
+          font-weight: 400;
+          line-height: normal;
+        }
+
+        .info-value {
+          color: #FFF;
+
+          font-size: 12px;
+          font-style: normal;
+          font-weight: 500;
+          line-height: normal;
+        }
+      }
+    }
+
+    .modal-btn {
+      margin-top: 24px;
+      width: 100%;
+      height: 48px;
+      background: $primary;
+      border-radius: 999px;
+      border: none;
+      color: #1A1E1D;
+      font-size: 16px;
+      font-weight: 500;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: background .18s;
+
+      img {
+        width: 30px;
+        animation: rotate 5s linear infinite;
+      }
+
+      &:hover {
+        background: $primary-hover;
+      }
+    }
+  }
+
+  .modal-btn:disabled {
+    cursor: not-allowed;
+  }
+
+
+
+  .open-btn {
+    margin: 40px;
+    padding: 8px 24px;
+    border-radius: 8px;
+    border: none;
+    background: #23242b;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .selected-info {
+    margin: 30px 0 0 40px;
+    font-size: 16px;
+    color: #fff;
+  }
+
+  .chain-select-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+  }
+
+  .chain-select-content {
+    max-width: 390px;
+    width: 100%;
+    height: auto;
+    background: #151517;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 32px 0 rgba(0, 0, 0, 0.35);
+    animation: showModal .2s;
+    height: 430px;
+    position: absolute;
+    bottom:  20%;
+    // left: 50%;
+    // transform: translateX(-50%);
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 20px;
+      font-weight: bold;
+      color: #fff;
+      margin-bottom: 24px;
+
+      span {
+        color: #fff;
+
+        font-size: 20px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: normal;
+      }
+
+      // padding: 0 32px 8px 32px;
+
+      .close-btn {
+        font-size: 20px;
+        cursor: pointer;
+        user-select: none;
+        transition: color 0.15s;
+
+        &:hover {
+          color: #ccc;
+        }
+      }
+    }
+
+    .search-box {
+      // margin: 0 32px 16px 32px;
+      display: flex;
+
+      input {
+        flex: 1;
+        border: none;
+        outline: none;
+        background: #252629;
+        border-radius: 100px;
+        height: 38px;
+        padding: 0 14px;
+        font-size: 15px;
+
+        color: #fff;
+
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: normal;
+
+        &::placeholder {
+          color: #666868;
+          ;
+        }
+      }
+    }
+
+    .chain-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      // margin: 0 24px;
+
+      .chain-item {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        height: 64px;
+        cursor: pointer;
+        border-radius: 14px;
+        padding: 0 16px;
+        transition: background .13s;
+        color: #fff;
+        color: var(---, #FFF);
+
+
+
+        .chain-icon {
+          width: 38px;
+          height: 38px;
+          border-radius: 50%;
+          // background: #23242b;
+          object-fit: contain;
+        }
+
+        .chain-name {
+          flex: 1;
+          font-size: 14px;
+          font-style: normal;
+          font-weight: 500;
+          color: #fff;
+          line-height: normal;
+
+        }
+
+        .check-mark {
+          color: #00e782;
+          font-size: 22px;
+          font-weight: bold;
+        }
+
+        &:hover,
+        &.active {
+          // background: #23242b;
+        }
+      }
+    }
+  }
+
+  @keyframes showModal {
+    from {
+      transform: scale(0.92);
+      opacity: 0;
+    }
+
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  @media (max-width: 768px) {
+
+    @keyframes showModal {
+      from {
+    transform: translateY(100%) scale(0.92);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+    }
+    .chain-select-content {
+       position: absolute;
+      bottom: 0;
+      width: 90vw;
+      padding: 15px;
+      .header { 
+        font-size: 18px;
+      }
+      }
+    .swap-container {
+      
+
+      max-width: 480px;
+      height: 550px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 0 15px;
+
+      h1 {
+        color: #FFF;
+        text-align: center;
+
+        font-size: 24px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: normal;
+        margin-bottom: 24px;
+      }
+
+      .content {
+        padding: 16px;
+        max-width: 480px;
+        // height: 450px;
+        border-radius: 24px;
+        background: #1E1E1E;
+
+        .item {
+          position: relative;
+          margin-bottom: 16px;
+          justify-content: space-between;
+
+          .arrow-wrap {
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            background: #1E1E1E;
+            border: 1.6px solid #2E2F32;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            // margin: 0 -19px; // 向两侧溢出半径
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-50%);
+            //    transform: translateY(-50%);
+            z-index: 2;
+            box-shadow: 0 1px 8px #0002 inset;
+
+          }
+
+          .arrow {
+            color: #00CE7A;
+            font-size: 14px;
+            font-weight: 700;
+            display: inline-block;
+            transform: translateY(-1px);
+          }
+
+          display: flex;
+          // justify-content: space-around;
+
+          .chain-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: none;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+            margin-bottom: 8px;
+          }
+
+          .chain-card {
+            cursor: pointer;
+            // flex: 1 1 0%;
+            background: #1E1E1E;
+            border-radius: 20px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            height: 72px;
+            border: 1px solid #2E2F32;
+            box-sizing: border-box;
+            min-width: 0;
+            transition: box-shadow 0.2s;
+
+            img {
+              width: 40px;
+              display: block;
+            }
+
+            &.left {
+              width: calc(50% - 5px);
+              // margin-right: 34px;
+              justify-content: flex-start;
+            }
+
+            &.right {
+              width: calc(50% - 5px);
+              justify-content: flex-end;
+            }
+
+            .icon {
+              width: 38px;
+              height: 38px;
+              border-radius: 50%;
+              object-fit: contain;
+              background: #191b20;
+              box-shadow: 0 1px 6px #15151522 inset;
+            }
+
+            .label {
+              color: #8E8E92;
+              // text-align: center;
+
+              font-size: 14px;
+              font-style: normal;
+              font-weight: 500;
+              line-height: normal;
+            }
+
+            .name {
+              color: var(---, #FFF);
+
+              font-size: 12px;
+              font-style: normal;
+              font-weight: 500;
+              line-height: normal;
+            }
+          }
+        }
+
+        .amount-card {
+          background: #1E1E1E;
+          border: 1px solid #2E2F32;
+          border-radius: 20px;
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          padding: 16px;
+          margin-bottom: 16px;
+          width: 100%;
+          box-sizing: border-box;
+          height: 99px;
+          position: relative;
+
+          .amount-main {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            flex: 1;
+
+            .amount-value {
+              color: #FFF;
+
+              font-size: 32px;
+              font-style: normal;
+              font-weight: 600;
+              line-height: normal;
+
+              input[type="number"]::-webkit-outer-spin-button,
+              input[type="number"]::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+              }
+
+              input[type="number"] {
+                -moz-appearance: textfield;
+                /* 可选：再加上自己需要的样式 */
+                /* appearance: textfield; */
+                /* 新标准也支持，但兼容性有限 */
+              }
+
+              input {
+                border: 0;
+                outline: none;
+                background: transparent;
+                color: #FFF;
+                width: 100px;
+                // text-align: center;
+                // font-family: "TT Hoves Pro Trial";
+                font-size: 32px;
+                font-style: normal;
+                font-weight: 600;
+                line-height: normal;
+              }
+            }
+
+            .amount-usd {
+              color: #FFF;
+
+              font-size: 12px;
+              font-style: normal;
+              font-weight: 400;
+              line-height: normal;
+              // margin-top: 5px;
+            }
+          }
+
+          .amount-side {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: space-between;
+            height: 100%;
+            min-width: 180px;
+
+            .token-selector {
+              display: flex;
+              align-items: center;
+              cursor: pointer;
+              border-radius: 100px;
+              border: 1px solid #2E2F32;
+
+              background: #151517;
+              border-radius: 24px;
+              padding: 8px 12px;
+              min-width: 72px;
+              // height: 44px;
+              font-size: 1.12rem;
+              color: #fff;
+              font-weight: 600;
+              // margin-bottom: 30px;
+              gap: 4px;
+
+              .token-icon {
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                background: #11df72;
+                margin-right: 6px;
+              }
+
+              span {
+                color: #FFF;
+                text-align: center;
+
+                font-size: 12px;
+                font-style: normal;
+                font-weight: 400;
+                line-height: normal;
+              }
+
+              .arrow {
+                margin-left: 8px;
+                margin-top: 2px;
+                width: 16px;
+                height: 16px;
+                display: inline-block;
+              }
+            }
+
+            .amount-avail {
+
+              color: #8E8E92;
+              display: flex;
+              align-items: center;
+              justify-content: space-around;
+              font-size: 12px;
+              font-style: normal;
+              font-weight: 400;
+              line-height: normal;
+
+              img {
+                width: 20px;
+                animation: rotate 5s linear infinite;
+              }
+
+              span {
+                color: #FFF;
+
+                font-size: 12px;
+                font-style: normal;
+                font-weight: 400;
+                line-height: normal;
+              }
+            }
+          }
+        }
+
+        .summary-card {
+          background: #1E1E1E;
+          border: 1px solid #2E2F32;
+          border-radius: 20px;
+          padding: 16px;
+          width: 100%;
+          box-sizing: border-box;
+          height: 107px;
+          margin-bottom: 16px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+
+          .summary-main {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            .summary-icon {
+              width: 48px;
+              height: 48px;
+              border-radius: 50%;
+
+              object-fit: cover;
+            }
+
+            .summary-info {
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+
+              .summary-amt {
+                color: #FFF;
+
+                font-size: 24px;
+                font-style: normal;
+                font-weight: 600;
+                line-height: normal;
+              }
+
+              .summary-usd {
+                color: #FFF;
+
+                font-size: 12px;
+                font-style: normal;
+                font-weight: 400;
+                line-height: normal;
+              }
+            }
+          }
+
+          .summary-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            // margin-top: 10px;
+
+            .summary-fee {
+              display: flex;
+              color: #8E8E92;
+
+              font-size: 12px;
+              font-style: normal;
+              font-weight: 400;
+              line-height: normal;
+
+              span {
+                color: #8E8E92;
+              }
+
+              ;
+
+              img {
+                width: 20px;
+                animation: rotate 5s linear infinite;
+              }
+            }
+
+            .summary-time {
+              color: #8E8E92;
+
+              font-size: 12px;
+              font-style: normal;
+              font-weight: 400;
+              line-height: normal;
+
+              .clock {
+                vertical-align: middle;
+                margin-top: 1px;
+                font-size: 10px;
+              }
+            }
+          }
+        }
+
+        .submit-btn {
+          width: 100%;
+          // padding: 20px  0;
+          display: block;
+          height: 48px;
+          border: none;
+          outline: none;
+          background: #00CE7A;
+          border-radius: 999px;
+          font-size: 16px;
+          font-style: normal;
+          font-weight: 500;
+          color: #1A1E1D;
+          cursor: pointer;
+          // margin-top: 16px;
+          transition: background 0.18s, filter 0.18s;
+
+          &:hover,
+          &:active {
+            background: #00c864;
+            filter: brightness(0.98);
+          }
+        }
+
+        .submit-btn:disabled {
+          cursor: not-allowed
+        }
+
+      }
+    }
+  }
+}</style>
