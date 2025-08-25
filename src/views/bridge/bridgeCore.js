@@ -308,6 +308,7 @@ export async function bridgeErc20Optimized({
       amountBigInt
     ]
     
+    console.log(args)
     const gasEstimate = await computedGas(
       bridgeABI,
       'BridgeInitiateERC20',

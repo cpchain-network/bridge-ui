@@ -569,11 +569,10 @@ async function initBridgeBalance() {
   getBridgeFees()
 }
 
-
 const bridgeMethod = async () => {
   console.log("bridgeMethod 被调用", coinChoose.value.name);
-   console.log(chain.value?.id)
-  console.log(fromChain.value.chainId)
+  
+  // 1. 验证钱包连接
   if (!address.value) {
     ElMessage({
       message: '请先连接钱包',
@@ -584,6 +583,7 @@ const bridgeMethod = async () => {
     return
   }
   
+  // 2. 验证金额
   if (!amount.value || Number(amount.value) <= 0) {
     ElMessage({
       message: '请输入有效的桥接金额',
@@ -594,6 +594,7 @@ const bridgeMethod = async () => {
     return
   }
   
+  // 3. 检查最小桥接金额
   if (Number(amount.value) < coinChoose.value.minBridgeAmount) {
     ElMessage({
       message: `最小桥接金额为 ${coinChoose.value.minBridgeAmount} ${coinChoose.value.name}`,
@@ -604,6 +605,7 @@ const bridgeMethod = async () => {
     return
   }
   
+  // 4. 检查余额
   if (Number(fromBalance.value) < Number(amount.value)) {
     ElMessage({
       message: '余额不足',
@@ -614,85 +616,69 @@ const bridgeMethod = async () => {
     return
   }
   
-
-  // 检查当前链是否正确
-if (chain.value?.id !== fromChain.value.chainId) {
-  try {
-    console.log("切换网络 ------")
-    await switchToNetwork(fromChain.value.chainId)
-    
-    // 等待一小段时间让 chain.value 更新
-    await new Promise(resolve => setTimeout(resolve, 500))
-    
-    // 二次验证网络是否切换成功
-    if (chain.value?.id !== fromChain.value.chainId) {
-      throw new Error('网络切换失败，当前网络与目标网络不匹配')
+  // 5. 检查并切换网络
+  if (chain.value?.id !== fromChain.value.chainId) {
+    try {
+      console.log("切换网络 ------")
+      await switchToNetwork(fromChain.value.chainId)
+      
+      // 等待网络切换完成
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      // 验证网络切换成功
+      if (chain.value?.id !== fromChain.value.chainId) {
+        throw new Error('网络切换失败，当前网络与目标网络不匹配')
+      }
+      
+      console.log('网络切换验证成功')
+    } catch (error) {
+      console.error('网络切换失败:', error)
+      ElMessage({
+        message: '请切换到正确的网络',
+        type: 'error',
+        duration: 2000,
+        showClose: true
+      })
+      return
     }
-    
-    console.log('网络切换验证成功')
-  } catch (error) {
-    console.error('网络切换失败:', error)
-    ElMessage({
-      message: '请切换到正确的网络',
-      type: 'error',
-      duration: 2000,
-      showClose: true
-    })
-    return
   }
-}
+  
   isProcessing.value = true
   
   try {
-    // 获取代币地址
-    let tokenAddress = null
-    if (coinChoose.value.name !== "ETH" && coinChoose.value.name !== "CP") {
-      const contractKey = coinChoose.value.name.toLowerCase() + 'Contract'
-      tokenAddress = fromChain.value[contractKey]
-      
-      if (!tokenAddress) {
-        throw new Error(`${coinChoose.value.name} 合约地址未配置`)
-      }
-    }
-    
-    // 获取目标链的 nativeTokenContract 作为 destTokenAddress
-    const destTokenAddress = toChain.value.nativeTokenContract
-    if (!destTokenAddress) {
-      throw new Error('目标链 nativeTokenContract 未配置')
-    }
-    
-    // 转换金额为 wei
+    // 6. 转换金额
     const amountInWei = parseEther(amount.value.toString())
     
-    // 获取桥接合约地址
+    // 7. 获取桥接合约地址
     const bridgeContractAddress = fromChain.value.bridgeContract
     if (!bridgeContractAddress) {
       throw new Error('桥接合约地址未配置')
     }
-    
-    // 调用桥接核心函数
+    const tokenSymbol = coinChoose.value.name.toLowerCase()
+const tokenAddress = fromChain.value[tokenSymbol + 'Contract']
+const destTokenAddress = toChain.value[tokenSymbol + 'Contract']
+
+    // 8. 调用桥接核心函数（使用新的动态解析逻辑）
     const result = await bridgeMethodOptimized({
-      tokenName: coinChoose.value.name,
-      tokenAddress: tokenAddress,
-      amount: amountInWei,
-      userAddress: address.value,
-      bridgeContractAddress: bridgeContractAddress,
-      fromChainId: fromChain.value.chainId,
-      targetChainId: toChain.value.chainId,
-      destTokenAddress: destTokenAddress, // 添加目标链的 nativeTokenContract
-      setTxHash: (hash) => {
-        console.log('桥接交易哈希:', hash)
-        // 可以在这里更新 UI 状态
-      },
-      setApprovalHash: (hash) => {
-        console.log('授权交易哈希:', hash)
-        // 可以在这里更新 UI 状态
-      }
-    })
+  tokenName: coinChoose.value.name,
+  tokenAddress: tokenAddress,
+  destTokenAddress: destTokenAddress,
+  amount: amountInWei,
+  userAddress: address.value,
+  bridgeContractAddress: bridgeContractAddress,
+  fromChainId: fromChain.value.chainId,
+  targetChainId: toChain.value.chainId,
+  setTxHash: (hash) => {
+    console.log('桥接交易哈希:', hash)
+  },
+  setApprovalHash: (hash) => {
+    console.log('授权交易哈希:', hash)
+  }
+})
     
     console.log('桥接成功:', result)
     
-    // 桥接成功后的处理
+    // 9. 桥接成功后处理
     // ElMessage({
     //   message: '桥接交易提交成功！',
     //   type: 'success',
@@ -728,7 +714,7 @@ if (chain.value?.id !== fromChain.value.chainId) {
   } finally {
     isProcessing.value = false
   }
-};
+}
 async function getBridgeFees() {
 
 
