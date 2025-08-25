@@ -677,7 +677,7 @@ const destTokenAddress = toChain.value[tokenSymbol + 'Contract']
 })
     
     console.log('桥接成功:', result)
-    
+    // 
     // 9. 桥接成功后处理
     // ElMessage({
     //   message: '桥接交易提交成功！',
