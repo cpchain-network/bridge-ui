@@ -304,7 +304,7 @@ export async function bridgeErc20Optimized({
       targetChainId,
       userAddress,
       tokenAddress,
-      destTokenAddress || tokenAddress,
+      destTokenAddress ,
       amountBigInt
     ]
     

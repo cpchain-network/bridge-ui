@@ -1,7 +1,7 @@
 import axios from "axios"
 // create an axios instance
 const serive = axios.create({
-    baseURL:"", // url = base url + request url
+    baseURL:"https://bridge-api-testnet.cpchain.com/", // url = base url + request url
     // withCredentials: true, // send cookies when cross-domain requests
     // timeout: 10000  // request timeout
   })
