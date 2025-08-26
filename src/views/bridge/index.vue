@@ -36,7 +36,7 @@
           <!-- 左侧 -->
           <div class="amount-main">
             <div class="amount-value">
-              <input type="number" placeholder="at  least 0.001" v-model="amount" />
+              <input type="number" placeholder="at  least 0.1" v-model="amount" />
               <!-- <div class="max-btn" @click="setMax">Max</div> -->
             </div>
             <!-- <div class="amount-usd">$25.26</div> -->
@@ -319,25 +319,25 @@ const gasFeeEthStr = ref('')
 const coinChoose = ref({
   img: "eth.svg",
   name: "ETH",
-  minBridgeAmount: 0.001
+  minBridgeAmount: 0.1
 })
 
 const allCoinList = ref([
   {
     img: "eth.svg",
     name: "ETH",
-    minBridgeAmount: 0.001
+    minBridgeAmount: 0.1
   },
   {
     img: "usdt.svg",
     name: "USDT",
-    minBridgeAmount: 0.001
+    minBridgeAmount: 0.1
   },
  
   {
     img: "cp.svg",
     name: "CP",
-    minBridgeAmount: 0.001
+    minBridgeAmount: 0.1
   }
 ])
 const txHash = ref('')
