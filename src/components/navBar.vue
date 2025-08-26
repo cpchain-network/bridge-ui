@@ -444,7 +444,22 @@ async function getBalanceCp(newAddress) {
 console.log(connectors);
 // 存储当前滚动位置
 const scrollY = ref(0);
-
+function waitForTPProvider(timeout = 5000) {
+  return new Promise((resolve, reject) => {
+    const start = Date.now();
+    const timer = setInterval(() => {
+      const eth = window.ethereum;
+      if (eth && eth.isTokenPocket) {
+        clearInterval(timer);
+        resolve(eth);
+      }
+      if (Date.now() - start > timeout) {
+        clearInterval(timer);
+        reject(new Error('TokenPocket 插件未注入或加载超时'));
+      }
+    }, 100);
+  });
+}
 async function wallconnects(id, chainId) {
   // const connector = injected(); // ✅
   // await connect({ connector, chainId })
