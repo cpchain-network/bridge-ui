@@ -231,17 +231,17 @@
               shortAddress(row.dest_tx_hash) }}</td>
             <td>{{ formatTimestamp(row.msg_sent_timestamp) }}</td>
             <td>{{ row.token_name }}</td>
-            <td>{{ formatToken(row.fee, "ETH") }}</td>
+            <td>{{ formatToken(row.fee, row.token_name) }}</td>
 
             <td>{{
-              formatToken(row.amount, "USDT")
+              formatToken(row.amount,row.token_name)
             }}</td>
             <td>{{ shortAddress(row.from_address) }}</td>
             <td>{{ shortAddress(row.to_address) }}</td>
             <td>
               <span :class="['status', row.status === 1 ? 'success' : 'fail']">
                 {{ row.status === 1 ? $t('bridge.record.state.success') :
-                  $t('bridge.record.state.error') }}
+                  $t('bridge.record.state.ped') }}
               </span>
             </td>
           </tr>
@@ -254,23 +254,26 @@
       <ul>
         <li v-for="(row, idx) in records" :key="idx">
           <div class="item">
-            <b class="name">{{ row.token_name}}</b>
-            <span class="see" @click="gotoScan('tx', row.source_tx_hash, row.source_chain_id)">{{ $t('bridge.record.opt') }}</span>
+            <b class="name">{{ row.token_name }}</b>
+            <span class="see" @click="gotoScan('tx', row.source_tx_hash, row.source_chain_id)">{{ $t('bridge.record.opt')
+            }}</span>
           </div>
           <div class="item">
             <b class="sendName">{{ $t('bridge.record.sourcehash') }}</b>
-            <span class="see" @click="gotoScan('tx', row.source_tx_hash, row.source_chain_id)">{{ shortAddress(row.source_tx_hash) }}</span>
+            <span class="see" @click="gotoScan('tx', row.source_tx_hash, row.source_chain_id)">{{
+              shortAddress(row.source_tx_hash) }}</span>
           </div>
           <div class="item">
             <b class="receiveName">{{ $t('bridge.record.tosourcehash') }}</b>
-            <span class="see"  @click="gotoScan('tx', row.dest_tx_hash, row.dest_chain_id)">{{ shortAddress(row.dest_tx_hash) }}</span>
+            <span class="see" @click="gotoScan('tx', row.dest_tx_hash, row.dest_chain_id)">{{
+              shortAddress(row.dest_tx_hash) }}</span>
           </div>
 
           <div class="item">
             <b class="statues">{{ $t('bridge.record.state.name') }}</b>
             <span :class="['status', row.status === 1 ? 'success' : 'fail']">
               {{ row.status === 1 ? $t('bridge.record.state.success') :
-                $t('bridge.record.state.error') }}
+                $t('bridge.record.state.ped') }}
             </span>
           </div>
 
@@ -296,7 +299,7 @@ import {
   ethers, Network, JsonRpcProvider, formatUnits,
 
 } from 'ethers';
-import { ref, onMounted, watch, computed } from "vue"
+import { ref, onMounted, watch, computed ,onUnmounted} from "vue"
 import erc20ABI from "@/assets/abi/erc20ABI"
 import bridge from "@/assets/abi/bridgeABI"
 const bridgeABI = bridge.abi
@@ -309,7 +312,7 @@ import { getBridgeRecords } from "@/api/records.js"
 import { ElMessage } from 'element-plus'
 console.log(networks)
 
-
+let  ws ="";
 const coinList = [
   {
     img: "eth.svg",
@@ -422,10 +425,15 @@ const isInsufficient = computed(() => {
 })
 watch(amount, (newValue, oldValue) => {
   // validatePositiveNumber(newValue, oldValue)
-
+  if (!newValue) {
+    bridgeAmount.value = ""
+    return
+  }
   // 保留5位精度，向下取整
-  const result = Math.floor(newValue * (1 - allbridgeFees.value) * 100000) / 100000
+  const result = newValue - allbridgeFees.value
+
   bridgeAmount.value = result.toFixed(5)
+
 })
 
 watch(
@@ -458,6 +466,39 @@ function handleCurrentChange(val) {
   pageNumber.value = val
   getRecordsList()
 
+}
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+// 接收实时推送 刷新列表
+async function Realtimerefresh() {
+  // bridge-indexer-ws-testnet.cpchain.com/ws
+   ws = new WebSocket("wss://bridge-indexer-ws-testnet.cpchain.com/ws");
+
+  ws.onopen = function (evt) {
+    
+    console.log("Connection open ...");
+    // ws.send("Hello WebSockets!");
+  };
+
+  ws.onmessage = async function (evt) {
+    await sleep(500)
+    console.log("Received Message: " + evt.data);
+    ElMessage({
+      message: 'Add History Record!',
+      type: 'success',
+      duration: 3000,
+      showClose: true
+    })
+    
+    initBridgeBalance()
+    // ws.close();
+  };
+
+  ws.onclose = function (evt) {
+    console.log("Connection closed.");
+  }
 }
 function formatTimestamp(ts) {
   // 如果是10位秒级时间戳，先乘1000
@@ -511,10 +552,10 @@ async function switchToNetwork(chainId) {
   }
 }
 function formatToken(value, symbol) {
-  if (!value || !symbol) return '0';
+  if (!value ) return '0';
 
   const upperSymbol = symbol.trim().toUpperCase();
-  const decimals = TOKEN_DECIMALS[upperSymbol];
+  const decimals = TOKEN_DECIMALS[upperSymbol]||18;
   if (decimals === undefined) return 'UnknownToken';
 
   try {
@@ -591,7 +632,13 @@ function initEthers(url, chainId) {
   return provider;
 }
 onMounted(() => {
-
+  Realtimerefresh()
+})
+onUnmounted(() => {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.close()
+    console.log('页面卸载，主动关闭 WebSocket')
+  }
 })
 watch(
   status,
@@ -853,6 +900,15 @@ async function getBridgeFees() {
   allusdtFees.value = calculateMarketPriceTimesFee(result.data.market_price, result.data.predict_fee)
   isloadingGas.value = false
   // this.allbridgeFees = result
+  if (!amount.value) {
+    bridgeAmount.value = ""
+
+  } else {
+
+    const result2 = amount.value - allbridgeFees.value
+
+    bridgeAmount.value = result2.toFixed(5)
+  }
 
 }
 
@@ -870,7 +926,7 @@ async function getRecordsList() {
   )
   records.value = result.data.Records
   Total.value = result.data.Total
-  this.pageNumber.value = result.data.Current
+  pageNumber.value = result.data.Current
 
 }
 
@@ -922,6 +978,7 @@ function select2(val) {
   background: #121212 url("../../assets/faucet_bg.png") no-repeat;
   background-size: 100% 100%;
   width: 100vw;
+  overflow-x: hidden;
   min-height: 100vh;
   display: flex;
   justify-content: center;
@@ -1427,12 +1484,12 @@ function select2(val) {
 
     table {
       width: 100%;
-      
+
 
       thead {
         th {
           color: var(---, #8E8E92);
-          
+
           font-size: 12px;
           font-style: normal;
           font-weight: 400;
@@ -1448,7 +1505,7 @@ function select2(val) {
           height: 64px;
 
           td {
-          
+
             color: #fff;
             font-size: 14px;
             font-style: normal;
@@ -1474,12 +1531,13 @@ function select2(val) {
             color: #00c864;
           }
         }
-        .alt {
-              background: #1E1E1E;
-            }
 
-      
-       }
+        .alt {
+          background: #1E1E1E;
+        }
+
+
+      }
     }
 
     ul {
@@ -1489,7 +1547,7 @@ function select2(val) {
 
   @media (max-width: 768px) {
     .recordList {
-      width: 100%;
+      width: calc(100% - 30px);
       padding: 0 15px;
 
       .records-title {
@@ -2424,5 +2482,4 @@ function select2(val) {
       }
     }
   }
-}
-</style>
+}</style>

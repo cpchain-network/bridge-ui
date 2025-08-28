@@ -24,7 +24,8 @@ export default {
         name: "Status",
         error: "Failed",
         success: "Successful",
-        opt: "Action"
+        opt: "Action",
+        ped:"pending"
       },
       opt: "Check"
     },

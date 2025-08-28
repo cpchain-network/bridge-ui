@@ -25,7 +25,8 @@ export default {
         name:"状态",
         error:"失败",
         success:"成功",
-        opt:"操作"
+        opt:"操作",
+        ped:"待办"
       },
       opt:"查看"
 
