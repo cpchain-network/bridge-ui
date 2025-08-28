@@ -26,8 +26,7 @@
               <div class="name">{{ toChain.name }}</div>
             </div>
             <div>
-              <img :src="getImageUrl(toChain.img)"
-              alt="">
+              <img :src="getImageUrl(toChain.img)" alt="">
             </div>
           </div>
         </div>
@@ -45,8 +44,7 @@
           <div class="amount-side">
             <div class="token-selector" @click="showCoin()">
 
-              <img :src="getImageUrl_1(coinChoose.img)"
-              class="token-icon" />
+              <img :src="getImageUrl_1(coinChoose.img)" class="token-icon" />
               <span>{{ coinChoose.name }}</span>
               <svg class="arrow" width="16" height="16" viewBox="0 0 20 20">
                 <path d="M6 8l4 4 4-4" stroke="#aaa" stroke-width="2" fill="none" stroke-linecap="round" />
@@ -64,9 +62,7 @@
 
         <div class="summary-card">
           <div class="summary-main">
-            <img class="summary-icon" 
-            :src="getImageUrl_1(coinChoose.img)"
-           alt="ETH" />
+            <img class="summary-icon" :src="getImageUrl_1(coinChoose.img)" alt="ETH" />
             <div class="summary-info">
               <div class="summary-amt">{{ bridgeAmount }}{{ coinChoose.name }}</div>
               <!-- <div class="summary-usd">$25.26</div> -->
@@ -121,9 +117,7 @@
           <span class="block-addr"> {{ ellipsisFilter(address) }}</span>
         </div>
         <div class="block-amount">
-          <img 
-          :src="getImageUrl_1(coinChoose.img)"
-          class="amount-icon" alt="">
+          <img :src="getImageUrl_1(coinChoose.img)" class="amount-icon" alt="">
           <span class="amount-value">{{ amount }} {{ coinChoose.name }}</span>
         </div>
       </div>
@@ -131,13 +125,13 @@
       <div class="modal-block">
         <div class="block-row">
           <div class="block-chain">
-            <img  class="block-icon"   :src="getImageUrl(toChain.img)" alt="">
+            <img class="block-icon" :src="getImageUrl(toChain.img)" alt="">
             <span class="block-label">{{ toChain.name }}{{ $t('bridge.get') }}</span>
           </div>
           <span class="block-addr"> {{ ellipsisFilter(address) }}</span>
         </div>
         <div class="block-amount">
-          <img  :src="getImageUrl_1(coinChoose.img)" class="amount-icon" alt="">
+          <img :src="getImageUrl_1(coinChoose.img)" class="amount-icon" alt="">
           <span class="amount-value">{{ bridgeAmount }} {{ coinChoose.name }}</span>
         </div>
       </div>
@@ -203,7 +197,7 @@
           <div v-for="coin in allCoinList" :key="coin.name" class="chain-item"
             :class="{ active: coin.name === coinChoose.name }" @click="select2(coin)">
             <img :src="getImageUrl_1(coin.img)" alt="" class="chain-icon">
-            
+
 
             <span class="chain-name">{{ coin.name }}</span>
             <span v-if="coin.name === coinChoose.name" class="check-mark">✔</span>
@@ -211,7 +205,89 @@
         </div>
       </div>
     </div>
+    <!-- 历史记录  -->
+    <div class="recordList">
+      <div class="records-title">{{ $t('bridge.record.title') }}</div>
+      <table cellpadding="0" cellspacing="0">
+        <thead>
+          <tr>
+            <th>{{ $t('bridge.record.sourcehash') }}</th>
+            <th>{{ $t('bridge.record.tosourcehash') }}</th>
+            <th>{{ $t('bridge.record.name1') }}</th>
+            <th>{{ $t('bridge.record.coin') }}</th>
+            <th>{{ $t('bridge.record.fee') }}</th>
+            <th>{{ $t('bridge.record.total') }}</th>
+            <th>{{ $t('bridge.record.send') }}</th>
 
+            <th>{{ $t('bridge.record.receive') }}</th>
+            <th>{{ $t('bridge.record.state.name') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(row, idx) in records" :key="idx" :class="{ 'alt': idx % 2 === 0 }">
+            <td class="goScan" @click="gotoScan('tx', row.source_tx_hash, row.source_chain_id)">{{
+              shortAddress(row.source_tx_hash) }}</td>
+            <td class="goScan" @click="gotoScan('tx', row.dest_tx_hash, row.dest_chain_id)">{{
+              shortAddress(row.dest_tx_hash) }}</td>
+            <td>{{ formatTimestamp(row.msg_sent_timestamp) }}</td>
+            <td>{{ row.token_name }}</td>
+            <td>{{ formatToken(row.fee, "ETH") }}</td>
+
+            <td>{{
+              formatToken(row.amount, "USDT")
+            }}</td>
+            <td>{{ shortAddress(row.from_address) }}</td>
+            <td>{{ shortAddress(row.to_address) }}</td>
+            <td>
+              <span :class="['status', row.status === 1 ? 'success' : 'fail']">
+                {{ row.status === 1 ? $t('bridge.record.state.success') :
+                  $t('bridge.record.state.error') }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+
+      </table>
+
+
+
+      <ul>
+        <li v-for="(row, idx) in records" :key="idx">
+          <div class="item">
+            <b class="name">{{ row.token_name}}</b>
+            <span class="see" @click="gotoScan('tx', row.source_tx_hash, row.source_chain_id)">{{ $t('bridge.record.opt') }}</span>
+          </div>
+          <div class="item">
+            <b class="sendName">{{ $t('bridge.record.sourcehash') }}</b>
+            <span class="see" @click="gotoScan('tx', row.source_tx_hash, row.source_chain_id)">{{ shortAddress(row.source_tx_hash) }}</span>
+          </div>
+          <div class="item">
+            <b class="receiveName">{{ $t('bridge.record.tosourcehash') }}</b>
+            <span class="see"  @click="gotoScan('tx', row.dest_tx_hash, row.dest_chain_id)">{{ shortAddress(row.dest_tx_hash) }}</span>
+          </div>
+
+          <div class="item">
+            <b class="statues">{{ $t('bridge.record.state.name') }}</b>
+            <span :class="['status', row.status === 1 ? 'success' : 'fail']">
+              {{ row.status === 1 ? $t('bridge.record.state.success') :
+                $t('bridge.record.state.error') }}
+            </span>
+          </div>
+
+          <div class="item">
+            <b class="time">{{ $t('bridge.record.name1') }}</b>
+            <span class="see">
+              {{ formatTimestamp(row.msg_sent_timestamp) }}
+            </span>
+          </div>
+        </li>
+      </ul>
+      <div class="pagination">
+        <el-pagination layout="prev, pager, next" :total="Total" :current-page.sync="pageNumber" :page-size="pageSize"
+          @current-change="handleCurrentChange">
+        </el-pagination>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -228,15 +304,12 @@ import { parseEther } from 'viem'
 import BigNumber from 'bignumber.js';
 import networks from "../../assets/json/networks.json"
 import { getbridgeFees } from "@/api/bridgePrice"
+import { getBridgeRecords } from "@/api/records.js"
 // 在 <script setup> 部分的导入区域添加
 import { ElMessage } from 'element-plus'
 console.log(networks)
-function getImageUrl(fileName) {
-  return new URL(`/src/assets/images/chain/${fileName}`, import.meta.url).href
-}
-function getImageUrl_1(fileName) {
-  return new URL(`/src/assets/images/coin/${fileName}`, import.meta.url).href
-}
+
+
 const coinList = [
   {
     img: "eth.svg",
@@ -247,7 +320,7 @@ const coinList = [
     name: "USDT",
     minBridgeAmount: 0.001
   },
- 
+
   {
     img: "cp.svg",
     name: "CP",
@@ -259,10 +332,11 @@ const coinList = [
 
 const TOKEN_DECIMALS = {
   ETH: 18,
-  USDT: 6,
-  USDC: 6,
+  USDT: 18,
+  USDC: 18,
   DAI: 18,
-  WBTC: 8
+  WBTC: 8,
+  CP: 18
 };
 import { switchChain } from '@wagmi/core'
 import {
@@ -274,12 +348,12 @@ import {
 const { connect, connectors, error } = useConnect();
 const { address, status, chain } = useAccount()
 import { config } from '../../wagmi.ts' // 确保路径正确
-import axios from "axios"
+
 // 在 script setup 的导入部分添加
 import { bridgeMethodOptimized } from './bridgeCore.js'
 const pageNumber = ref(1)
 
-const pageSize = ref(10)
+const pageSize = ref(5)
 const Total = ref(0)
 const isloadingGas = ref(false)
 const records = ref([])
@@ -333,7 +407,7 @@ const allCoinList = ref([
     name: "USDT",
     minBridgeAmount: 0.1
   },
- 
+
   {
     img: "cp.svg",
     name: "CP",
@@ -367,11 +441,50 @@ watch(
   },
   { deep: true }
 )
+function getImageUrl(fileName) {
+  return new URL(`/src/assets/images/chain/${fileName}`, import.meta.url).href
+}
+function getImageUrl_1(fileName) {
+  return new URL(`/src/assets/images/coin/${fileName}`, import.meta.url).href
+}
+function shortAddress(address) {
+  if (typeof address !== 'string' || address.length < 10) {
+    return ''
+  }
+  return address.slice(0, 6) + '...' + address.slice(-4)
+}
+
+function handleCurrentChange(val) {
+  pageNumber.value = val
+  getRecordsList()
+
+}
+function formatTimestamp(ts) {
+  // 如果是10位秒级时间戳，先乘1000
+  if (ts.toString().length === 10) {
+    ts = ts * 1000;
+  }
+  const date = new Date(ts);
+  const Y = date.getFullYear();
+  const M = String(date.getMonth() + 1).padStart(2, '0');
+  const D = String(date.getDate()).padStart(2, '0');
+  const h = String(date.getHours()).padStart(2, '0');
+  const m = String(date.getMinutes()).padStart(2, '0');
+  const s = String(date.getSeconds()).padStart(2, '0');
+  return `${Y}-${M}-${D} ${h}:${m}:${s}`;
+}
+
 function getIconUrl(filename) {
   return new URL(`../assets/images/chain/${filename}`, import.meta.url).href
 }
 
-
+function gotoScan(type, value, chainId) {
+  const network = networks.find(network => network.chainId === Number(chainId));
+  if (network && (type === 'tx' || type === 'address')) {
+    let url = `${network.explorerUrl}/${type}/${value}`;
+    window.open(url, "_blank");
+  }
+}
 function showChain(state1) {
   showModal.value = true
   state.value = state1
@@ -397,6 +510,19 @@ async function switchToNetwork(chainId) {
     console.error('网络切换失败', error)
   }
 }
+function formatToken(value, symbol) {
+  if (!value || !symbol) return '0';
+
+  const upperSymbol = symbol.trim().toUpperCase();
+  const decimals = TOKEN_DECIMALS[upperSymbol];
+  if (decimals === undefined) return 'UnknownToken';
+
+  try {
+    return formatUnits(BigInt(value), decimals);
+  } catch (e) {
+    return '0';
+  }
+}
 
 function switchChains() {
   // 交换 UI 上的 fromChain 和 toChain
@@ -412,12 +538,7 @@ function switchChains() {
   initBridgeBalance()
 }
 function tab(item) {
-  // const { chainId } = useWeb3ModalAccount()
-  // if (chainId && chainId?.value !== this.fromChain?.chainId) {
 
-  //   await this.switchNet(this.fromChain)
-  //   return
-  // }
   bridgeStep.value = item
 }
 function fliterChain() {
@@ -470,17 +591,17 @@ function initEthers(url, chainId) {
   return provider;
 }
 onMounted(() => {
-  
+
 })
 watch(
   status,
   (newStatus) => {
     if (newStatus === "connected" || newStatus === "disconnected") {
       initBridgeBalance()
- 
+
     }
     if (newStatus === "disconnected") {
-      amount.value=''
+      amount.value = ''
     }
   }
 )
@@ -567,11 +688,12 @@ async function initBridgeBalance() {
 
   isLoadingBalance.value = false
   getBridgeFees()
+  getRecordsList()
 }
 
 const bridgeMethod = async () => {
   console.log("bridgeMethod 被调用", coinChoose.value.name);
-  
+
   // 1. 验证钱包连接
   if (!address.value) {
     ElMessage({
@@ -582,7 +704,7 @@ const bridgeMethod = async () => {
     })
     return
   }
-  
+
   // 2. 验证金额
   if (!amount.value || Number(amount.value) <= 0) {
     ElMessage({
@@ -593,7 +715,7 @@ const bridgeMethod = async () => {
     })
     return
   }
-  
+
   // 3. 检查最小桥接金额
   if (Number(amount.value) < coinChoose.value.minBridgeAmount) {
     ElMessage({
@@ -604,7 +726,7 @@ const bridgeMethod = async () => {
     })
     return
   }
-  
+
   // 4. 检查余额
   if (Number(fromBalance.value) < Number(amount.value)) {
     ElMessage({
@@ -615,21 +737,21 @@ const bridgeMethod = async () => {
     })
     return
   }
-  
+
   // 5. 检查并切换网络
   if (chain.value?.id !== fromChain.value.chainId) {
     try {
       console.log("切换网络 ------")
       await switchToNetwork(fromChain.value.chainId)
-      
+
       // 等待网络切换完成
       await new Promise(resolve => setTimeout(resolve, 500))
-      
+
       // 验证网络切换成功
       if (chain.value?.id !== fromChain.value.chainId) {
         throw new Error('网络切换失败，当前网络与目标网络不匹配')
       }
-      
+
       console.log('网络切换验证成功')
     } catch (error) {
       console.error('网络切换失败:', error)
@@ -642,40 +764,40 @@ const bridgeMethod = async () => {
       return
     }
   }
-  
+
   isProcessing.value = true
-  
+
   try {
     // 6. 转换金额
     const amountInWei = parseEther(amount.value.toString())
-    
+
     // 7. 获取桥接合约地址
     const bridgeContractAddress = fromChain.value.bridgeContract
     if (!bridgeContractAddress) {
       throw new Error('桥接合约地址未配置')
     }
     const tokenSymbol = coinChoose.value.name.toLowerCase()
-const tokenAddress = fromChain.value[tokenSymbol + 'Contract']
-const destTokenAddress = toChain.value[tokenSymbol + 'Contract']
+    const tokenAddress = fromChain.value[tokenSymbol + 'Contract']
+    const destTokenAddress = toChain.value[tokenSymbol + 'Contract']
 
     // 8. 调用桥接核心函数（使用新的动态解析逻辑）
     const result = await bridgeMethodOptimized({
-  tokenName: coinChoose.value.name,
-  tokenAddress: tokenAddress,
-  destTokenAddress: destTokenAddress,
-  amount: amountInWei,
-  userAddress: address.value,
-  bridgeContractAddress: bridgeContractAddress,
-  fromChainId: fromChain.value.chainId,
-  targetChainId: toChain.value.chainId,
-  setTxHash: (hash) => {
-    console.log('桥接交易哈希:', hash)
-  },
-  setApprovalHash: (hash) => {
-    console.log('授权交易哈希:', hash)
-  }
-})
-    
+      tokenName: coinChoose.value.name,
+      tokenAddress: tokenAddress,
+      destTokenAddress: destTokenAddress,
+      amount: amountInWei,
+      userAddress: address.value,
+      bridgeContractAddress: bridgeContractAddress,
+      fromChainId: fromChain.value.chainId,
+      targetChainId: toChain.value.chainId,
+      setTxHash: (hash) => {
+        console.log('桥接交易哈希:', hash)
+      },
+      setApprovalHash: (hash) => {
+        console.log('授权交易哈希:', hash)
+      }
+    })
+
     console.log('桥接成功:', result)
     // 
     // 9. 桥接成功后处理
@@ -685,17 +807,17 @@ const destTokenAddress = toChain.value[tokenSymbol + 'Contract']
     //   duration: 3000,
     //   showClose: true
     // })
-    
+
     // 重置表单
     amount.value = ''
     bridgeStep.value = 1
-    
+
     // 刷新余额
     await initBridgeBalance()
-    
+
   } catch (error) {
     console.error('桥接失败:', error)
-    
+
     let errorMessage = '桥接失败'
     if (error.message.includes('User rejected')) {
       errorMessage = '用户取消了交易'
@@ -704,7 +826,7 @@ const destTokenAddress = toChain.value[tokenSymbol + 'Contract']
     } else if (error.message) {
       errorMessage = error.message
     }
-    
+
     // ElMessage({
     //   message: errorMessage,
     //   type: 'error',
@@ -731,6 +853,24 @@ async function getBridgeFees() {
   allusdtFees.value = calculateMarketPriceTimesFee(result.data.market_price, result.data.predict_fee)
   isloadingGas.value = false
   // this.allbridgeFees = result
+
+}
+
+async function getRecordsList() {
+  if (!address.value) return
+  var result = await getBridgeRecords(
+
+
+    pageNumber.value,
+    pageSize.value,
+    "desc",
+    address.value
+
+
+  )
+  records.value = result.data.Records
+  Total.value = result.data.Total
+  this.pageNumber.value = result.data.Current
 
 }
 
@@ -782,11 +922,12 @@ function select2(val) {
   background: #121212 url("../../assets/faucet_bg.png") no-repeat;
   background-size: 100% 100%;
   width: 100vw;
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
   align-items: center;
+  padding: 80px 0;
 
   button:disabled {
     cursor: not-allowed
@@ -798,8 +939,15 @@ function select2(val) {
     color: #fff;
   }
 
+  .pagination {
+    display: flex;
+    width: 100%;
+    justify-content: flex-end;
+  }
+
   :deep(.el-pagination button:disabled) {
     background: transparent;
+    color: #666868;
   }
 
   :deep(.el-pagination .btn-next) {
@@ -810,8 +958,18 @@ function select2(val) {
     background: transparent !important;
   }
 
-  :deep(.el-pager li.active) {
-    color: #00CE7A;
+  :deep(.el-pager li.is-active) {
+    border-radius: 8px;
+    background: #00CE7A;
+    color: #1A1E1D;
+    text-align: center;
+
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 22px;
+    /* 157.143% */
+
   }
 
   .pagination {
@@ -1251,6 +1409,196 @@ function select2(val) {
       }
 
     }
+
+  }
+
+  .recordList {
+    width: 100%;
+    padding: 0 120px;
+
+    .records-title {
+      color: #FFF;
+
+      font-size: 24px;
+      font-style: normal;
+      font-weight: 500;
+      line-height: normal;
+    }
+
+    table {
+      width: 100%;
+      
+
+      thead {
+        th {
+          color: var(---, #8E8E92);
+          
+          font-size: 12px;
+          font-style: normal;
+          font-weight: 400;
+          line-height: normal;
+          height: 40px;
+          text-align: left;
+        }
+      }
+
+      tbody {
+        tr {
+
+          height: 64px;
+
+          td {
+          
+            color: #fff;
+            font-size: 14px;
+            font-style: normal;
+            font-weight: 500;
+            line-height: normal;
+
+            .status {
+              font-weight: 500;
+
+              &.success {
+                color: #00CE7A;
+              }
+
+              &.fail {
+                color: #f4575e;
+              }
+            }
+
+          }
+
+          .goScan:hover {
+            cursor: pointer;
+            color: #00c864;
+          }
+        }
+        .alt {
+              background: #1E1E1E;
+            }
+
+      
+       }
+    }
+
+    ul {
+      display: none;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .recordList {
+      width: 100%;
+      padding: 0 15px;
+
+      .records-title {
+        color: #FFF;
+
+        font-size: 18px;
+        font-style: normal;
+        font-weight: 500;
+        line-height: normal;
+      }
+
+      table {
+        width: 100%;
+
+        display: none
+      }
+
+      ul {
+        display: block;
+        list-style: none;
+        margin-top: 40px;
+
+        li {
+          margin-bottom: 16px;
+
+          border-bottom: 0.5px solid #2E2F32;
+
+          .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 17px;
+            margin-bottom: 8px;
+
+            .name {
+              color: #F3F5F6;
+
+              font-size: 15px;
+              font-style: normal;
+              font-weight: 500;
+              line-height: normal;
+            }
+
+            .see {
+              color: #8E8E92;
+
+              font-size: 12px;
+              font-style: normal;
+              font-weight: 400;
+              line-height: normal;
+            }
+
+            .sendName {
+              color: #8E8E92;
+
+              font-size: 12px;
+              font-style: normal;
+              font-weight: 400;
+              line-height: normal;
+            }
+
+            .time {
+              color: #8E8E92;
+
+              font-size: 12px;
+              font-style: normal;
+              font-weight: 400;
+              line-height: normal;
+            }
+
+            .receiveName {
+              color: #8E8E92;
+
+              font-size: 12px;
+              font-style: normal;
+              font-weight: 500;
+              line-height: normal;
+            }
+
+            .statues {
+              color: #8E8E92;
+
+              font-size: 12px;
+              font-style: normal;
+              font-weight: 400;
+              line-height: normal;
+            }
+
+            .status {
+              font-weight: 500;
+              font-size: 12px;
+
+              &.success {
+                color: #00CE7A;
+              }
+
+              &.fail {
+                color: #f4575e;
+              }
+            }
+          }
+
+          .item:first-child {
+            height: 21px;
+            margin-bottom: 12px;
+          }
+        }
+      }
+    }
   }
 
   .record {
@@ -1264,130 +1612,7 @@ function select2(val) {
       max-width: 1200px;
       min-height: 200px;
 
-      .cross-records {
-        margin-top: 48px;
-        width: 100%;
 
-        .records-title {
-          font-size: 1.3rem;
-          font-weight: 600;
-          color: #fff;
-          margin-bottom: 20px;
-        }
-
-        .records-table {
-          border-radius: 12px;
-          overflow: hidden;
-          background: none;
-          border: none;
-          width: 100%;
-          min-width: 900px;
-          box-sizing: border-box;
-          font-size: 1.07rem;
-
-          .records-thead,
-          .records-tr {
-            display: flex;
-            align-items: center;
-            width: 100%;
-          }
-
-          .records-thead {
-            // background: #242424;
-            color: #eee;
-            font-weight: 500;
-            height: 46px;
-
-            .th {
-              flex: 1;
-              padding: 0 10px;
-              color: #8E8E92;
-              text-align: center;
-              font-size: 12px;
-              font-style: normal;
-              font-weight: 400;
-              line-height: normal;
-            }
-          }
-
-          .records-tr {
-            min-height: 48px;
-            // height: 48px;
-            // background: #191b1e;
-            color: #f2f2f2;
-            transition: background 0.15s;
-
-            .td {
-              flex: 1;
-              // text-align: center;
-              padding: 0 10px;
-              color: #FFF;
-
-              font-size: 14px;
-              font-style: normal;
-              font-weight: 500;
-              line-height: normal;
-              // white-space: nowrap;
-              // overflow: hidden;
-              // text-overflow: ellipsis;
-            }
-
-            &.alt {
-              background: #1E1E1E;
-            }
-
-            &:hover {
-              background: #1E1E1E;
-            }
-          }
-
-          .status {
-            font-weight: 500;
-
-            &.success {
-              color: #00CE7A;
-            }
-
-            &.fail {
-              color: #f4575e;
-            }
-          }
-
-          .retry-btn,
-          .detail-link {
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            border: none;
-            background: none;
-            padding: 0;
-            color: #fff;
-            transition: text-decoration 0.15s;
-
-            &:hover {
-              color: #00CE7A;
-            }
-          }
-
-          .retry-btn {
-            color: #fff;
-          }
-
-        }
-
-        // 响应式
-        @media (max-width: 900px) {
-          .records-table {
-            min-width: 100vw;
-            font-size: 0.99rem;
-
-            .th,
-            .td {
-              padding: 0 6px;
-            }
-          }
-        }
-      }
     }
   }
 
@@ -1634,7 +1859,7 @@ function select2(val) {
     animation: showModal .2s;
     height: 430px;
     position: absolute;
-    bottom:  20%;
+    bottom: 20%;
     // left: 50%;
     // transform: translateX(-50%);
 
@@ -1766,25 +1991,29 @@ function select2(val) {
 
     @keyframes showModal {
       from {
-    transform: translateY(100%) scale(0.92);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0) scale(1);
-    opacity: 1;
-  }
+        transform: translateY(100%) scale(0.92);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
     }
+
     .chain-select-content {
-       position: absolute;
+      position: absolute;
       bottom: 0;
       width: 90vw;
       padding: 15px;
-      .header { 
+
+      .header {
         font-size: 18px;
       }
-      }
+    }
+
     .swap-container {
-      
+
 
       max-width: 480px;
       height: 550px;
@@ -2195,4 +2424,5 @@ function select2(val) {
       }
     }
   }
-}</style>
+}
+</style>

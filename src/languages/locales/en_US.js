@@ -26,7 +26,7 @@ export default {
         success: "Successful",
         opt: "Action"
       },
-      opt: "View details"
+      opt: "Check"
     },
     search: "Search",
     sureTitle: "Confirm information",

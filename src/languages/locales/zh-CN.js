@@ -27,7 +27,7 @@ export default {
         success:"成功",
         opt:"操作"
       },
-      opt:"查看详情"
+      opt:"查看"
 
     },
     search:"搜索",
