@@ -379,6 +379,7 @@ export async function bridgeErc20Optimized({
 /**
  * 统一的桥接方法
  */
+
 export async function bridgeMethodOptimized({
   tokenName,
   tokenAddress,
@@ -392,9 +393,12 @@ export async function bridgeMethodOptimized({
   setApprovalHash
 }) {
   try {
-    const isNativeToken = tokenName === "ETH" || tokenName === "CP"
+    // 修改判断逻辑
+    const shouldUseBridgeEthOptimized = 
+      (fromChainId === 86606 && tokenName === "CP") ||  // cp chain 上跨链 CP 币
+      (fromChainId !== 86606 && tokenName === "ETH")    // 除了 cp chain 以外的链跨链 ETH
     
-    if (isNativeToken) {
+    if (shouldUseBridgeEthOptimized) {
       return await bridgeEthOptimized({
         amount,
         userAddress,
@@ -423,7 +427,6 @@ export async function bridgeMethodOptimized({
     throw error
   }
 }
-
 /**
  * 获取桥接费率
  */
@@ -552,4 +555,4 @@ export async function getFundingPoolBalance(bridgeContractAddress, tokenAddress,
   }
 }
 
-// 向后兼容的别名函数
+

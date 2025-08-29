@@ -35,7 +35,8 @@
           <!-- 左侧 -->
           <div class="amount-main">
             <div class="amount-value">
-              <input type="number" placeholder="at  least 0.1" v-model="amount" />
+              <input type="number" placeholder="at  least 0.1" v-model.trim="amount" />
+              <!-- <div class="error-message">金额过大，请输入合理数值</div> -->
               <!-- <div class="max-btn" @click="setMax">Max</div> -->
             </div>
             <!-- <div class="amount-usd">$25.26</div> -->
@@ -234,7 +235,7 @@
             <td>{{ formatToken(row.fee, row.token_name) }}</td>
 
             <td>{{
-              formatToken(row.amount,row.token_name)
+              formatToken(row.amount, row.token_name)
             }}</td>
             <td>{{ shortAddress(row.from_address) }}</td>
             <td>{{ shortAddress(row.to_address) }}</td>
@@ -257,6 +258,18 @@
             <b class="name">{{ row.token_name }}</b>
             <span class="see" @click="gotoScan('tx', row.source_tx_hash, row.source_chain_id)">{{ $t('bridge.record.opt')
             }}</span>
+          </div>
+          <div class="item">
+            <b class="sendName">{{ $t('bridge.record.total') }}</b>
+            <span class="see">
+              {{ formatToken(row.amount, row.token_name) }}
+            </span>
+          </div>
+          <div class="item">
+            <b class="sendName">{{ $t('bridge.record.fee') }}</b>
+            <span class="see">
+              {{ formatToken(row.fee, row.token_name) }}
+            </span>
           </div>
           <div class="item">
             <b class="sendName">{{ $t('bridge.record.sourcehash') }}</b>
@@ -299,7 +312,7 @@ import {
   ethers, Network, JsonRpcProvider, formatUnits,
 
 } from 'ethers';
-import { ref, onMounted, watch, computed ,onUnmounted} from "vue"
+import { ref, onMounted, watch, computed, onUnmounted } from "vue"
 import erc20ABI from "@/assets/abi/erc20ABI"
 import bridge from "@/assets/abi/bridgeABI"
 const bridgeABI = bridge.abi
@@ -312,7 +325,7 @@ import { getBridgeRecords } from "@/api/records.js"
 import { ElMessage } from 'element-plus'
 console.log(networks)
 
-let  ws ="";
+let ws = "";
 const coinList = [
   {
     img: "eth.svg",
@@ -421,7 +434,7 @@ const txHash = ref('')
 const approvalHash = ref('')
 const isInsufficient = computed(() => {
   return Number(fromBalance.value) >= Number(coinChoose.value.minBridgeAmount) &&
-    Number(fromBalance.value) >= Number(amount.value)
+    Number(fromBalance.value) >= Number(amount.value) && amount.value
 })
 watch(amount, (newValue, oldValue) => {
   // validatePositiveNumber(newValue, oldValue)
@@ -430,9 +443,16 @@ watch(amount, (newValue, oldValue) => {
     return
   }
   // 保留5位精度，向下取整
-  const result = newValue - allbridgeFees.value
+  // const result = new BigNumber(newValue) - new BigNumber(allbridgeFees.value)
+  const result = new BigNumber(newValue).minus(new BigNumber(allbridgeFees.value))
+  if (result.isLessThan(0)) {
+    bridgeAmount.value = "0"  // 或者显示 "Insufficient funds" 等提示
+    // 可选：显示错误提示
+    // console.warn('桥接金额不足，费用超过输入金额')
+  } else {
+    bridgeAmount.value = result.toFixed(8)
+  }
 
-  bridgeAmount.value = result.toFixed(5)
 
 })
 
@@ -474,25 +494,45 @@ function sleep(ms) {
 // 接收实时推送 刷新列表
 async function Realtimerefresh() {
   // bridge-indexer-ws-testnet.cpchain.com/ws
-   ws = new WebSocket("wss://bridge-indexer-ws-testnet.cpchain.com/ws");
+  ws = new WebSocket("wss://bridge-indexer-ws-testnet.cpchain.com/ws");
 
   ws.onopen = function (evt) {
-    
+
     console.log("Connection open ...");
     // ws.send("Hello WebSockets!");
   };
 
   ws.onmessage = async function (evt) {
-    await sleep(500)
+    // await sleep(500)
     console.log("Received Message: " + evt.data);
-    ElMessage({
+    let result = JSON.parse(evt.data)
+    console.log(result)
+    if (result.status == 0) {
+      await sleep(500)
+      ElMessage({
+        message: 'Funds arrive!',
+        type: 'success',
+        duration: 3000,
+        showClose: true
+      })
+
+      initBridgeBalance()
+    }
+
+    if (result.status == 1) {
+      await sleep(500)
+       ElMessage({
       message: 'Add History Record!',
       type: 'success',
       duration: 3000,
       showClose: true
     })
-    
-    initBridgeBalance()
+
+    getRecordsList()
+    }
+  
+
+    // initBridgeBalance()
     // ws.close();
   };
 
@@ -552,10 +592,10 @@ async function switchToNetwork(chainId) {
   }
 }
 function formatToken(value, symbol) {
-  if (!value ) return '0';
+  if (!value) return '0';
 
   const upperSymbol = symbol.trim().toUpperCase();
-  const decimals = TOKEN_DECIMALS[upperSymbol]||18;
+  const decimals = TOKEN_DECIMALS[upperSymbol] || 18;
   if (decimals === undefined) return 'UnknownToken';
 
   try {
@@ -902,12 +942,17 @@ async function getBridgeFees() {
   // this.allbridgeFees = result
   if (!amount.value) {
     bridgeAmount.value = ""
-
   } else {
+    const result2 = new BigNumber(amount.value).minus(new BigNumber(allbridgeFees.value))
 
-    const result2 = amount.value - allbridgeFees.value
-
-    bridgeAmount.value = result2.toFixed(5)
+    // 检查结果是否为负数
+    if (result2.isLessThan(0)) {
+      bridgeAmount.value = "0"  // 或者显示 "Insufficient funds" 等提示
+      // 可选：显示错误提示
+      // console.warn('桥接金额不足，费用超过输入金额')
+    } else {
+      bridgeAmount.value = result2.toFixed(8)
+    }
   }
 
 }
@@ -975,6 +1020,13 @@ function select2(val) {
 
 <style lang="scss" scoped>
 .bridge {
+  .error-message {
+    color: #ff4757;
+    font-size: 12px;
+    font-weight: normal;
+
+  }
+
   background: #121212 url("../../assets/faucet_bg.png") no-repeat;
   background-size: 100% 100%;
   width: 100vw;
@@ -2482,4 +2534,5 @@ function select2(val) {
       }
     }
   }
-}</style>
+}
+</style>
