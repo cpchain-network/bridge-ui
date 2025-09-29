@@ -57,8 +57,11 @@ export async function computedGas(abi, functionName, args, to, account, value = 
       ...(value && { value })
     })
 
+    // 添加 20% 缓冲来应对高峰期
+    const gasWithBuffer = (gas * BigInt(120)) / BigInt(100)
+
     return {
-      gas,
+      gas: gasWithBuffer,
       maxFeePerGas: feesPerGas.maxFeePerGas,
       maxPriorityFeePerGas: feesPerGas.maxPriorityFeePerGas
     }
@@ -71,7 +74,6 @@ export async function computedGas(abi, functionName, args, to, account, value = 
     }
   }
 }
-
 /**
  * 检查 ERC20 代币授权额度
  */
@@ -99,7 +101,8 @@ export async function approveToken({
   spenderAddress,
   amount,
   userAddress,
-  useExactApproval = true
+  useExactApproval = true,
+  BRIDGE_MESSAGES
 }) {
   try {
     const amountBigInt = safeBigInt(amount)
@@ -136,7 +139,7 @@ export async function approveToken({
     }
     
     ElMessage({
-      message: 'Approval confirmed successfully!',
+      message: BRIDGE_MESSAGES.approvalSuccess,
       type: 'success',
       duration: 3000,
       showClose: true
@@ -147,9 +150,9 @@ export async function approveToken({
     console.error('❌ Approval error:', error)
     
     if (isUserRejectedError(error)) {
-      throw new Error('User cancelled the authorization operation')
+      throw new Error(BRIDGE_MESSAGES.userCancelledAuth) // 使用国际化消息
     }
-    throw new Error('Failed to approve token: ' + (error.message || error))
+    throw new Error(BRIDGE_MESSAGES.approveTokenFailed + (error.message || error)) // 使用国际化消息
   }
 }
 
@@ -163,7 +166,8 @@ export async function bridgeEthOptimized({
   fromChainId,
   targetChainId,
   destTokenAddress,
-  setTxHash
+  setTxHash,
+  BRIDGE_MESSAGES
 }) {
   try {
     const amountBigInt = safeBigInt(amount)
@@ -205,7 +209,7 @@ export async function bridgeEthOptimized({
     
     if (receipt.status === 'success') {
       ElMessage({
-        message: 'Bridge Transaction Succeeded.',
+        message: BRIDGE_MESSAGES.bridgeSuccess,
         type: 'success',
         duration: 3000,
         showClose: true
@@ -215,10 +219,10 @@ export async function bridgeEthOptimized({
         success: true,
         txHash: hash,
         receipt: receipt,
-        message: 'Bridge Transaction Succeeded.'
+        message: BRIDGE_MESSAGES.bridgeSuccess
       }
     } else {
-      throw new Error('Bridge failed')
+      throw new Error(BRIDGE_MESSAGES.bridgeFailed)
     }
     
   } catch (error) {
@@ -226,16 +230,16 @@ export async function bridgeEthOptimized({
     
     if (isUserRejectedError(error)) {
       ElMessage({
-        message: 'User rejected the request.',
+        message: BRIDGE_MESSAGES.userRejected,
         type: 'warning',
         duration: 2000,
         showClose: true
       })
-      throw new Error('User rejected the request.')
+      throw new Error(BRIDGE_MESSAGES.userRejected)
     }
     
     ElMessage({
-      message: 'Bridge failed',
+      message: BRIDGE_MESSAGES.bridgeFailed,
       type: 'error',
       duration: 2000,
       showClose: true
@@ -258,7 +262,8 @@ export async function bridgeErc20Optimized({
   targetChainId,
   tokenName,
   setTxHash,
-  setApprovalHash
+  setApprovalHash,
+  BRIDGE_MESSAGES
 }) {
   try {
     const amountBigInt = safeBigInt(amount)
@@ -290,7 +295,8 @@ export async function bridgeErc20Optimized({
         spenderAddress: bridgeContractAddress,
         amount: amountBigInt,
         userAddress,
-        useExactApproval: true
+        useExactApproval: true,
+        BRIDGE_MESSAGES
       })
       
       setApprovalHash && setApprovalHash(approvalHash)
@@ -336,7 +342,7 @@ export async function bridgeErc20Optimized({
     
     if (receipt.status === 'success') {
       ElMessage({
-        message: 'Bridge Transaction Succeeded.',
+        message: BRIDGE_MESSAGES.bridgeSuccess,
         type: 'success',
         duration: 3000,
         showClose: true
@@ -346,10 +352,10 @@ export async function bridgeErc20Optimized({
         success: true,
         txHash: hash,
         receipt: receipt,
-        message: 'Bridge Transaction Succeeded.'
+        message: BRIDGE_MESSAGES.bridgeSuccess
       }
     } else {
-      throw new Error('Bridge failed')
+      throw new Error(BRIDGE_MESSAGES.bridgeFailed)
     }
     
   } catch (error) {
@@ -357,16 +363,16 @@ export async function bridgeErc20Optimized({
     
     if (isUserRejectedError(error)) {
       ElMessage({
-        message: 'User rejected the request.',
+        message: BRIDGE_MESSAGES.userRejected,
         type: 'warning',
         duration: 2000,
         showClose: true
       })
-      throw new Error('User rejected the request.')
+      throw new Error(BRIDGE_MESSAGES.userRejected)
     }
     
     ElMessage({
-      message: 'Bridge failed',
+      message: BRIDGE_MESSAGES.bridgeFailed,
       type: 'error',
       duration: 2000,
       showClose: true
@@ -379,7 +385,6 @@ export async function bridgeErc20Optimized({
 /**
  * 统一的桥接方法
  */
-
 export async function bridgeMethodOptimized({
   tokenName,
   tokenAddress,
@@ -390,7 +395,8 @@ export async function bridgeMethodOptimized({
   fromChainId,
   targetChainId,
   setTxHash,
-  setApprovalHash
+  setApprovalHash,
+  BRIDGE_MESSAGES
 }) {
   try {
     // 修改判断逻辑
@@ -406,7 +412,8 @@ export async function bridgeMethodOptimized({
         fromChainId,
         targetChainId,
         destTokenAddress,
-        setTxHash
+        setTxHash,
+        BRIDGE_MESSAGES
       })
     } else {
       return await bridgeErc20Optimized({
@@ -419,139 +426,13 @@ export async function bridgeMethodOptimized({
         targetChainId,
         tokenName,
         setTxHash,
-        setApprovalHash
+        setApprovalHash,
+        BRIDGE_MESSAGES
       })
     }
   } catch (error) {
     console.error('❌ Bridge method error:', error)
     throw error
-  }
-}
-/**
- * 获取桥接费率
- */
-export async function getBridgeFeeRate({
-  bridgeContractAddress,
-  amount,
-  fromChainId,
-  targetChainId
-}) {
-  try {
-    const amountBigInt = safeBigInt(amount)
-    const fee = await readContract(config, {
-      address: bridgeContractAddress,
-      abi: bridgeABI,
-      functionName: 'PerFee',
-      args: [amountBigInt, fromChainId, targetChainId]
-    })
-    
-    return BigInt(fee || 0)
-  } catch (error) {
-    console.error('Failed to get bridge fee rate:', error)
-    return BigInt(0)
-  }
-}
-
-/**
- * 计算桥接费用
- */
-export async function calculateBridgeFee({
-  bridgeContractAddress,
-  amount,
-  fromChainId,
-  targetChainId
-}) {
-  try {
-    const amountBigInt = safeBigInt(amount)
-    const feeRate = await getBridgeFeeRate({
-      bridgeContractAddress,
-      amount: amountBigInt,
-      fromChainId,
-      targetChainId
-    })
-    
-    // 计算实际费用 (amount * feeRate / 10000)
-    const fee = (amountBigInt * feeRate) / BigInt(10000)
-    return fee
-  } catch (error) {
-    console.error('Failed to calculate bridge fee:', error)
-    return BigInt(0)
-  }
-}
-
-/**
- * 检查链是否支持
- */
-export async function isSupportedChain(bridgeContractAddress, chainId) {
-  try {
-    const isSupported = await readContract(config, {
-      address: bridgeContractAddress,
-      abi: bridgeABI,
-      functionName: 'IsSupportedChainId',
-      args: [chainId]
-    })
-    
-    return Boolean(isSupported)
-  } catch (error) {
-    console.error('Failed to check supported chain:', error)
-    return false
-  }
-}
-
-/**
- * 检查代币是否支持
- */
-export async function isSupportedToken(bridgeContractAddress, tokenAddress, chainId) {
-  try {
-    const isSupported = await readContract(config, {
-      address: bridgeContractAddress,
-      abi: bridgeABI,
-      functionName: 'IsSupportedToken',
-      args: [tokenAddress, chainId]
-    })
-    
-    return Boolean(isSupported)
-  } catch (error) {
-    console.error('Failed to check supported token:', error)
-    return false
-  }
-}
-
-/**
- * 获取最小转账金额
- */
-export async function getMinTransferAmount(bridgeContractAddress, tokenAddress, chainId) {
-  try {
-    const minAmount = await readContract(config, {
-      address: bridgeContractAddress,
-      abi: bridgeABI,
-      functionName: 'MinTransferAmount',
-      args: [tokenAddress, chainId]
-    })
-    
-    return BigInt(minAmount || 0)
-  } catch (error) {
-    console.error('Failed to get min transfer amount:', error)
-    return BigInt(0)
-  }
-}
-
-/**
- * 获取资金池余额
- */
-export async function getFundingPoolBalance(bridgeContractAddress, tokenAddress, chainId) {
-  try {
-    const balance = await readContract(config, {
-      address: bridgeContractAddress,
-      abi: bridgeABI,
-      functionName: 'FundingPoolBalance',
-      args: [tokenAddress, chainId]
-    })
-    
-    return BigInt(balance || 0)
-  } catch (error) {
-    console.error('Failed to get funding pool balance:', error)
-    return BigInt(0)
   }
 }
 

@@ -1,6 +1,6 @@
 <template>
   <div class="bridge">
-    <!--  <img :src="`/src/assets/images/chain/${fromChain.img}`"> -->
+
     <div class="swap-container" v-if="bridgeStep === 1">
       <h1>
         {{ $t('bridge.title') }}
@@ -35,11 +35,12 @@
           <!-- 左侧 -->
           <div class="amount-main">
             <div class="amount-value">
-              <input type="number" placeholder="at  least 0.1" v-model.trim="amount" />
-              <!-- <div class="error-message">金额过大，请输入合理数值</div> -->
-              <!-- <div class="max-btn" @click="setMax">Max</div> -->
+              <input type="number" :disabled="!address" :placeholder="$t('bridge.placeholderAmount')"
+                v-model.trim="amount" @input="validateAndCorrectAmount" @blur="validateAndCorrectAmount" step="any"
+                min="0.1" />
+
             </div>
-            <!-- <div class="amount-usd">$25.26</div> -->
+
           </div>
           <!-- 右侧 -->
           <div class="amount-side">
@@ -66,7 +67,7 @@
             <img class="summary-icon" :src="getImageUrl_1(coinChoose.img)" alt="ETH" />
             <div class="summary-info">
               <div class="summary-amt">{{ bridgeAmount }}{{ coinChoose.name }}</div>
-              <!-- <div class="summary-usd">$25.26</div> -->
+
             </div>
           </div>
           <div class="summary-bottom">
@@ -76,8 +77,8 @@
               <span v-else> ${{ allusdtFees }}({{ allbridgeFees }}{{ coinChoose.name }})</span>
             </div>
             <div class="summary-time">
-              3~10 mins
-              <svg width="15" height="15" class="clock" viewBox="0 0 20 20">
+              {{ $t('bridge.transferTime') }}
+              <svg width="12" height="12" class="clock" viewBox="0 0 20 20">
                 <circle cx="10" cy="10" r="8" stroke="#a0a0a0" stroke-width="1.5" fill="none" />
                 <line x1="10" y1="10" x2="10" y2="6" stroke="#a0a0a0" stroke-width="1.2" stroke-linecap="round" />
                 <line x1="10" y1="10" x2="13.3" y2="12.1" stroke="#a0a0a0" stroke-width="1.2" stroke-linecap="round" />
@@ -89,8 +90,14 @@
         <div id="gascontainer">
 
         </div>
-        <button class="submit-btn" :disabled="!isInsufficient" @click="tab(2)">
+        <!-- <button class="submit-btn" :disabled="!isInsufficient" @click="tab(2)">
           <span v-if="!isInsufficient"> {{ $t('bridge.Insufficient') }} </span>
+          <span v-else>{{ $t('bridge.Crosschain') }}</span>
+        </button> -->
+        <button class="submit-btn" :disabled="address && (!amount || !isInsufficient)" @click="handleSubmitClick">
+          <span v-if="!address">{{ $t('bridge.connectWallet') }}</span>
+          <span v-else-if="!amount">{{ $t('bridge.enterValidAmount') }}</span>
+          <span v-else-if="!isInsufficient">{{ $t('bridge.Insufficient') }}</span>
           <span v-else>{{ $t('bridge.Crosschain') }}</span>
         </button>
       </div>
@@ -105,7 +112,7 @@
         </el-icon>
         <!-- <i class="el-icon-back" style="color: #fff;cursor: pointer;" @click="tab(1)"></i> -->
         <span class="modal-title"> {{ $t('bridge.sureTitle') }}</span>
-        <span class="close-btn" @click="$emit('close')">×</span>
+        <span class="close-btn" @click="tab(1)">×</span>
       </div>
       <!-- 资产1 -->
       <div class="modal-block">
@@ -144,7 +151,7 @@
         </div>
         <div class="info-row">
           <span class="info-label">{{ $t('bridge.time') }}</span>
-          <span class="info-value">3~10mins</span>
+          <span class="info-value">{{ $t('bridge.transferTime') }}</span>
         </div>
         <div class="info-row">
           <span class="info-label">{{ $t('bridge.fee') }}</span>
@@ -163,7 +170,7 @@
     <div class="chain-select-modal" v-if="showModal">
       <div class="chain-select-content">
         <div class="header">
-          <span>Select  Chain</span>
+          <span>{{ $t('bridge.selChain') }}</span>
           <span class="close-btn" @click="handleClose">✕</span>
         </div>
         <div class="search-box">
@@ -173,7 +180,7 @@
         <div class="chain-list">
           <div v-for="chain in chains" :key="chain.id" class="chain-item" :class="{ active: chain.name === selected }"
             @click="select(chain)">
-            <!-- <img :src="require(`@/assets/imgs/chain/${chain.img}`)" class="chain-icon" alt="" /> -->
+
             <img :src="getImageUrl(chain.img)" alt="" class="chain-icon">
             <span class="chain-name">{{ chain.name }}</span>
             <span v-if="chain.chainId === selected.chainId" class="check-mark">✔</span>
@@ -187,7 +194,7 @@
     <div class="chain-select-modal" v-if="showModal2">
       <div class="chain-select-content">
         <div class="header">
-          <span>Select  Coin</span>
+          <span>{{ $t('bridge.selIcon') }}</span>
           <span class="close-btn" @click="showModal2 = false">✕</span>
         </div>
         <div class="search-box">
@@ -209,108 +216,110 @@
     <!-- 历史记录  -->
     <div class="recordList">
       <div class="records-title">{{ $t('bridge.record.title') }}</div>
-      <table cellpadding="0" cellspacing="0">
-        <thead>
-          <tr>
-            <th>{{ $t('bridge.record.sourcehash') }}</th>
-            <th>{{ $t('bridge.record.tosourcehash') }}</th>
-            <th>{{ $t('bridge.record.name1') }}</th>
-            <th>{{ $t('bridge.record.coin') }}</th>
-            <th>{{ $t('bridge.record.fee') }}</th>
-            <th>{{ $t('bridge.record.total') }}</th>
-            <th>{{ $t('bridge.record.send') }}</th>
+      <div v-if="records.length > 0">
+        <table cellpadding="0" cellspacing="0">
+          <thead>
+            <tr>
+              <th>{{ $t('bridge.record.sourcehash') }}</th>
+              <th>{{ $t('bridge.record.tosourcehash') }}</th>
+              <th>{{ $t('bridge.record.name1') }}</th>
+              <th>{{ $t('bridge.record.coin') }}</th>
+              <th>{{ $t('bridge.record.fee') }}</th>
+              <th>{{ $t('bridge.record.total') }}</th>
+              <th>{{ $t('bridge.record.send') }}</th>
 
-            <th>{{ $t('bridge.record.receive') }}</th>
-            <th>{{ $t('bridge.record.state.name') }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(row, idx) in records" :key="idx" :class="{ 'alt': idx % 2 === 0 }">
-            <td class="goScan" @click="gotoScan('tx', row.source_tx_hash, row.source_chain_id)">{{
-              shortAddress(row.source_tx_hash) }}</td>
-            <td class="goScan" @click="gotoScan('tx', row.dest_tx_hash, row.dest_chain_id)">{{
-              shortAddress(row.dest_tx_hash) }}</td>
-            <td>{{ formatTimestamp(row.msg_sent_timestamp) }}</td>
-            <td>{{ row.token_name }}</td>
-            <td>{{ formatToken(row.fee, row.token_name) }}</td>
+              <th>{{ $t('bridge.record.receive') }}</th>
+              <th>{{ $t('bridge.record.state.name') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(row, idx) in records" :key="idx" :class="{ 'alt': idx % 2 === 0 }">
+              <td class="goScan" @click="gotoScan('tx', row.source_tx_hash, row.source_chain_id)">{{
+                shortAddress(row.source_tx_hash) }}</td>
+              <td class="goScan" @click="gotoScan('tx', row.dest_tx_hash, row.dest_chain_id)">{{
+                shortAddress(row.dest_tx_hash) }}</td>
+              <td>{{ formatTimestamp(row.msg_sent_timestamp) }}</td>
+              <td>{{ row.token_name }}</td>
+              <td>{{ formatToken(row.fee, row.token_name) }}</td>
 
-            <td>{{
-              formatToken(row.amount, row.token_name)
-            }}</td>
-            <td>{{ shortAddress(row.from_address) }}</td>
-            <td>{{ shortAddress(row.to_address) }}</td>
-            <td>
+              <td>{{
+                formatToken(row.amount, row.token_name)
+              }}</td>
+              <td>{{ shortAddress(row.from_address) }}</td>
+              <td>{{ shortAddress(row.to_address) }}</td>
+              <td>
+                <span :class="['status', row.status === 1 ? 'success' : 'fail']">
+                  {{ row.status === 1 ? $t('bridge.record.state.success') :
+                    $t('bridge.record.state.ped') }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+
+        </table>
+
+
+
+        <ul>
+          <li v-for="(row, idx) in records" :key="idx">
+            <div class="item">
+              <b class="name">{{ row.token_name }}</b>
+              <span class="see" @click="gotoScan('tx', row.source_tx_hash, row.source_chain_id)">{{
+                $t('bridge.record.opt')
+              }}</span>
+            </div>
+            <div class="item">
+              <b class="sendName">{{ $t('bridge.record.total') }}</b>
+              <span class="see">
+                {{ formatToken(row.amount, row.token_name) }}
+              </span>
+            </div>
+            <div class="item">
+              <b class="sendName">{{ $t('bridge.record.fee') }}</b>
+              <span class="see">
+                {{ formatToken(row.fee, row.token_name) }}
+              </span>
+            </div>
+            <div class="item">
+              <b class="sendName">{{ $t('bridge.record.sourcehash') }}</b>
+              <span class="see" @click="gotoScan('tx', row.source_tx_hash, row.source_chain_id)">{{
+                shortAddress(row.source_tx_hash) }}</span>
+            </div>
+            <div class="item">
+              <b class="receiveName">{{ $t('bridge.record.tosourcehash') }}</b>
+              <span class="see" @click="gotoScan('tx', row.dest_tx_hash, row.dest_chain_id)">{{
+                shortAddress(row.dest_tx_hash) }}</span>
+            </div>
+
+            <div class="item">
+              <b class="statues">{{ $t('bridge.record.state.name') }}</b>
               <span :class="['status', row.status === 1 ? 'success' : 'fail']">
                 {{ row.status === 1 ? $t('bridge.record.state.success') :
                   $t('bridge.record.state.ped') }}
               </span>
-            </td>
-          </tr>
-        </tbody>
+            </div>
 
-      </table>
-
-
-
-      <ul>
-        <li v-for="(row, idx) in records" :key="idx">
-          <div class="item">
-            <b class="name">{{ row.token_name }}</b>
-            <span class="see" @click="gotoScan('tx', row.source_tx_hash, row.source_chain_id)">{{ $t('bridge.record.opt')
-            }}</span>
-          </div>
-          <div class="item">
-            <b class="sendName">{{ $t('bridge.record.total') }}</b>
-            <span class="see">
-              {{ formatToken(row.amount, row.token_name) }}
-            </span>
-          </div>
-          <div class="item">
-            <b class="sendName">{{ $t('bridge.record.fee') }}</b>
-            <span class="see">
-              {{ formatToken(row.fee, row.token_name) }}
-            </span>
-          </div>
-          <div class="item">
-            <b class="sendName">{{ $t('bridge.record.sourcehash') }}</b>
-            <span class="see" @click="gotoScan('tx', row.source_tx_hash, row.source_chain_id)">{{
-              shortAddress(row.source_tx_hash) }}</span>
-          </div>
-          <div class="item">
-            <b class="receiveName">{{ $t('bridge.record.tosourcehash') }}</b>
-            <span class="see" @click="gotoScan('tx', row.dest_tx_hash, row.dest_chain_id)">{{
-              shortAddress(row.dest_tx_hash) }}</span>
-          </div>
-
-          <div class="item">
-            <b class="statues">{{ $t('bridge.record.state.name') }}</b>
-            <span :class="['status', row.status === 1 ? 'success' : 'fail']">
-              {{ row.status === 1 ? $t('bridge.record.state.success') :
-                $t('bridge.record.state.ped') }}
-            </span>
-          </div>
-
-          <div class="item">
-            <b class="time">{{ $t('bridge.record.name1') }}</b>
-            <span class="see">
-              {{ formatTimestamp(row.msg_sent_timestamp) }}
-            </span>
-          </div>
-        </li>
-      </ul>
-      <div class="pagination">
-        <el-pagination layout="prev, pager, next" :total="Total" :current-page.sync="pageNumber" :page-size="pageSize"
-          @current-change="handleCurrentChange">
-        </el-pagination>
+            <div class="item">
+              <b class="time">{{ $t('bridge.record.name1') }}</b>
+              <span class="see">
+                {{ formatTimestamp(row.msg_sent_timestamp) }}
+              </span>
+            </div>
+          </li>
+        </ul>
+        <div class="pagination">
+          <el-pagination layout="prev, pager, next" :total="Total" :current-page.sync="pageNumber" :page-size="pageSize"
+            @current-change="handleCurrentChange">
+          </el-pagination>
+        </div>
       </div>
+
     </div>
   </div>
 </template>
-
 <script setup>
 import {
   ethers, Network, JsonRpcProvider, formatUnits,
-
 } from 'ethers';
 import { ref, onMounted, watch, computed, onUnmounted } from "vue"
 import erc20ABI from "@/assets/abi/erc20ABI"
@@ -324,24 +333,61 @@ import { getBridgeRecords } from "@/api/records.js"
 // 在 <script setup> 部分的导入区域添加
 import { ElMessage } from 'element-plus'
 console.log(networks)
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
+import { useCounterStore } from '@/stores/counter'
+import { storeToRefs } from 'pinia'
 
+// 拿到 store
+const counterStore = useCounterStore()
+const { visible, isLogin } = storeToRefs(counterStore)
+// 翻译消息常量 - 保持原有的结构，只是扩展内容
+const BRIDGE_MESSAGES = computed(() => ({
+  userCancelledAuth: t('bridge.userCancelledAuth'),
+  approveTokenFailed: t('bridge.approveTokenFailed'),
+  approvalPending: t('bridge.approvalPending'),
+  approvalConfirmed: t('bridge.approvalConfirmed'),
+  approvalFailed: t('bridge.approvalFailed'),
+  bridgePending: t('bridge.bridgePending'),
+  bridgeConfirmed: t('bridge.bridgeConfirmed'),
+  bridgeFailed: t('bridge.bridgeFailed'),
+  insufficientBalance: t('bridge.insufficientBalance'),
+  invalidAmount: t('bridge.invalidAmountFormat'),
+  networkMismatch: t('bridge.networkSwitchFailed'),
+  userRejected: t('bridge.userRejected'),
+  unknownError: t('bridge.unknownError'),
+  approvalSuccess: t('bridge.approvalSuccess'),
+  bridgeSuccess: t('bridge.bridgeSuccess'),
+  bridgeFailed: t('bridge.bridgeFailed')
+}))
+
+// UI 消息常量
+const UI_MESSAGES = computed(() => ({
+  connectWallet: t('bridge.connectWallet'),
+  enterValidAmount: t('bridge.enterValidAmount'),
+  minimumAmount: t('bridge.minimumBridgeAmount'),
+  insufficientBalance: t('bridge.insufficientBalance'),
+  switchNetwork: t('bridge.switchToCorrectNetwork'),
+  fundsArrived: t('bridge.fundsArrive'),
+  historyAdded: t('bridge.historyAdded')
+}))
 let ws = "";
 const coinList = [
   {
     img: "eth.svg",
     name: "ETH",
-    minBridgeAmount: 0.001
+    minBridgeAmount: 0.1
   }, {
     img: "usdt.png",
     name: "USDT",
-    minBridgeAmount: 0.001
+    minBridgeAmount: 0.1
   },
-
   {
     img: "cp.svg",
     name: "CP",
-    minBridgeAmount: 0.001
+    minBridgeAmount: 0.1
   },
+
 
 
 ]
@@ -354,6 +400,7 @@ const TOKEN_DECIMALS = {
   WBTC: 8,
   CP: 18
 };
+
 import { switchChain } from '@wagmi/core'
 import {
   useChainId, useConnect, useDisconnect, useAccount, useAccountEffect, useWriteContract,
@@ -388,7 +435,7 @@ const fromChain = ref(networks[0])
 const toChain = ref(networks[1])
 const state = ref()
 
-const feeDesc = ref(`Sender pays a 0.001% \n\n trading fee for each transfer`)
+
 const bridgeFee = ref(0.0001)
 const amount = ref(null)
 
@@ -417,18 +464,17 @@ const allCoinList = ref([
     img: "eth.svg",
     name: "ETH",
     minBridgeAmount: 0.1
-  },
-  {
-    img: "usdt.svg",
+  }, {
+    img: "usdt.png",
     name: "USDT",
     minBridgeAmount: 0.1
   },
-
   {
     img: "cp.svg",
     name: "CP",
     minBridgeAmount: 0.1
-  }
+  },
+
 ])
 const txHash = ref('')
 const approvalHash = ref('')
@@ -436,6 +482,7 @@ const isInsufficient = computed(() => {
   return Number(fromBalance.value) >= Number(coinChoose.value.minBridgeAmount) &&
     Number(fromBalance.value) >= Number(amount.value) && amount.value
 })
+
 watch(amount, (newValue, oldValue) => {
   // validatePositiveNumber(newValue, oldValue)
   if (!newValue) {
@@ -443,17 +490,15 @@ watch(amount, (newValue, oldValue) => {
     return
   }
   // 保留5位精度，向下取整
-  // const result = new BigNumber(newValue) - new BigNumber(allbridgeFees.value)
+
   const result = new BigNumber(newValue).minus(new BigNumber(allbridgeFees.value))
   if (result.isLessThan(0)) {
     bridgeAmount.value = "0"  // 或者显示 "Insufficient funds" 等提示
     // 可选：显示错误提示
-    // console.warn('桥接金额不足，费用超过输入金额')
+
   } else {
     bridgeAmount.value = result.toFixed(8)
   }
-
-
 })
 
 watch(
@@ -469,12 +514,114 @@ watch(
   },
   { deep: true }
 )
+// 在 shortAddress 函数后添加
+// 在 shortAddress 函数后添加
+function validateAndCorrectAmount() {
+  if (!amount.value) return
+  
+  let value = amount.value.toString()
+  
+  // 移除非数字字符（除了小数点）
+  value = value.replace(/[^0-9.]/g, '')
+  
+  // 确保只有一个小数点（保留第一个，移除后续的）
+  const parts = value.split('.')
+  if (parts.length > 2) {
+    value = parts[0] + '.' + parts[1]
+  }
+  
+  // 移除开头的多个零（但保留 0.xxx 格式）
+  if (value.startsWith('00')) {
+    value = value.replace(/^0+/, '0')
+  } else if (value.startsWith('0') && value.length > 1 && value[1] !== '.') {
+    value = value.substring(1)
+  }
+  
+  // 限制小数位数为8位
+  if (value.includes('.')) {
+    const [integer, decimal] = value.split('.')
+    if (decimal.length > 8) {
+      value = integer + '.' + decimal.substring(0, 8)
+    }
+  }
+  
+  // 确保不是负数
+  const numValue = parseFloat(value)
+  if (numValue < 0) {
+    value = '0'
+  }
+  
+  // 如果值发生了变化，更新 amount
+  if (value !== amount.value) {
+    amount.value = value
+  }
+}
+function handleSubmitClick() {
+  // 如果未连接钱包，则连接钱包
+  if (!address.value) {
+
+    isLogin.value = true
+
+    return;
+  }
+
+  // 如果已连接钱包且满足条件，则执行桥接操作
+  if (amount.value && isInsufficient.value) {
+
+    // 1. 验证钱包连接
+    if (!address.value) {
+      ElMessage({
+        message: UI_MESSAGES.value.connectWallet,
+        type: 'warning',
+        duration: 2000,
+        showClose: true
+      })
+      return
+    }
+
+    // 2. 验证金额
+    if (!amount.value || Number(amount.value) <= 0) {
+      ElMessage({
+        message: UI_MESSAGES.value.enterValidAmount,
+        type: 'warning',
+        duration: 2000,
+        showClose: true
+      })
+      return
+    }
+
+    // 3. 检查最小桥接金额
+    if (Number(amount.value) < coinChoose.value.minBridgeAmount) {
+      ElMessage({
+        message: `${UI_MESSAGES.value.minimumAmount} ${coinChoose.value.minBridgeAmount} ${coinChoose.value.name}`,
+        type: 'warning',
+        duration: 2000,
+        showClose: true
+      })
+      return
+    }
+
+    // 4. 检查余额
+    if (Number(fromBalance.value) < Number(amount.value)) {
+      ElMessage({
+        message: UI_MESSAGES.value.insufficientBalance,
+        type: 'warning',
+        duration: 2000,
+        showClose: true
+      })
+      return
+    }
+    tab(2);
+  }
+}
 function getImageUrl(fileName) {
   return new URL(`/src/assets/images/chain/${fileName}`, import.meta.url).href
 }
+
 function getImageUrl_1(fileName) {
   return new URL(`/src/assets/images/coin/${fileName}`, import.meta.url).href
 }
+
 function shortAddress(address) {
   if (typeof address !== 'string' || address.length < 10) {
     return ''
@@ -485,8 +632,8 @@ function shortAddress(address) {
 function handleCurrentChange(val) {
   pageNumber.value = val
   getRecordsList()
-
 }
+
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
@@ -497,7 +644,6 @@ async function Realtimerefresh() {
   ws = new WebSocket("wss://bridge-indexer-ws-testnet.cpchain.com/ws");
 
   ws.onopen = function (evt) {
-
     console.log("Connection open ...");
     // ws.send("Hello WebSockets!");
   };
@@ -510,7 +656,7 @@ async function Realtimerefresh() {
     if (result.status == 0) {
       await sleep(500)
       ElMessage({
-        message: 'Funds arrive!',
+        message: UI_MESSAGES.value.fundsArrived,
         type: 'success',
         duration: 3000,
         showClose: true
@@ -521,16 +667,10 @@ async function Realtimerefresh() {
 
     if (result.status == 1) {
       await sleep(500)
-       ElMessage({
-      message: 'Add History Record!',
-      type: 'success',
-      duration: 3000,
-      showClose: true
-    })
 
-    getRecordsList()
+      console.log(result)
+      initBridgeBalance()
     }
-  
 
     // initBridgeBalance()
     // ws.close();
@@ -540,6 +680,7 @@ async function Realtimerefresh() {
     console.log("Connection closed.");
   }
 }
+
 function formatTimestamp(ts) {
   // 如果是10位秒级时间戳，先乘1000
   if (ts.toString().length === 10) {
@@ -566,16 +707,15 @@ function gotoScan(type, value, chainId) {
     window.open(url, "_blank");
   }
 }
+
 function showChain(state1) {
   showModal.value = true
   state.value = state1
   //  console.log(state)
   chains.value = networks
   search.value = ""
-
-
-
 }
+
 function ellipsisFilter(value) {
   if (typeof value !== 'string') return value;
 
@@ -583,6 +723,7 @@ function ellipsisFilter(value) {
   const endPart = value.slice(-4);
   return `${startPart}...${endPart}`;
 }
+
 async function switchToNetwork(chainId) {
   try {
     await switchChain(config, { chainId })
@@ -591,6 +732,7 @@ async function switchToNetwork(chainId) {
     console.error('网络切换失败', error)
   }
 }
+
 function formatToken(value, symbol) {
   if (!value) return '0';
 
@@ -613,38 +755,32 @@ function switchChains() {
   Object.assign(a, b)
   Object.assign(b, temp)
 
-
-
   // 初始化桥接余额
   initBridgeBalance()
 }
-function tab(item) {
 
+function tab(item) {
   bridgeStep.value = item
 }
+
 function fliterChain() {
   var arr = chains.value.filter(
     c =>
       c.name.toLowerCase().includes(search.value.toLowerCase().trim())
-
   );
-
 
   chains.value = arr
 
   if (search.value.toLowerCase().trim() === "") {
     chains.value = networks
   }
-
 }
 
 function fliterCoin() {
   var arr = allCoinList.value.filter(
     c =>
       c.name.toLowerCase().includes(search2.value.toLowerCase().trim())
-
   );
-
 
   allCoinList.value = arr
 
@@ -652,16 +788,19 @@ function fliterCoin() {
     allCoinList.value = coinList
   }
 }
+
 function handleClose() {
   showModal.value = false;
   search.value = "";
 }
+
 function showCoin() {
   // console.log(coinList.value)
   allCoinList.value = coinList
   showModal2.value = true
   search2.value = ""
 }
+
 function initEthers(url, chainId) {
   let provider;
   if (chainId === 43851) {
@@ -671,27 +810,38 @@ function initEthers(url, chainId) {
   }
   return provider;
 }
+
 onMounted(() => {
   Realtimerefresh()
 })
+
 onUnmounted(() => {
   if (ws && ws.readyState === WebSocket.OPEN) {
     ws.close()
+    ws = ""
     console.log('页面卸载，主动关闭 WebSocket')
   }
 })
+
 watch(
   status,
   (newStatus) => {
     if (newStatus === "connected" || newStatus === "disconnected") {
       initBridgeBalance()
-
     }
     if (newStatus === "disconnected") {
       amount.value = ''
+      fromBalance.value = ""
+      toBalance.value = ""
+      records.value = []
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.close()
+        console.log('页面卸载，主动关闭 WebSocket')
+      }
     }
   }
 )
+
 async function getTokenBalance({ provider, address, chainInfo, tokenName }) {
   const isCpChain = chainInfo.chainId === 86606;
   const token = tokenName.toUpperCase();
@@ -702,7 +852,7 @@ async function getTokenBalance({ provider, address, chainInfo, tokenName }) {
     if (token === nativeToken && !(isCpChain && token === 'ETH')) {
       const balance = await provider.getBalance(address);
       console.log(`[原生币] ${token} - 余额:`, balance.toString());
-      return parseFloat(ethers.formatEther(balance)).toFixed(6);
+      return parseFloat(ethers.formatUnits(balance, 18)).toFixed(6);
     }
 
     // ✅ 情况 2：CP链上的 ETH，走 ethContract 查询
@@ -716,7 +866,7 @@ async function getTokenBalance({ provider, address, chainInfo, tokenName }) {
       console.log(`[CP链 ETH] 通过合约 ${ethContract} 查询`);
       const contract = new ethers.Contract(ethContract, erc20ABI, provider);
       const balance = await contract.balanceOf(address);
-      return parseFloat(ethers.formatEther(balance)).toFixed(6);
+      return parseFloat(ethers.formatUnits(balance, 18)).toFixed(6);
     }
 
     // ✅ 情况 3：普通 ERC20 代币
@@ -731,7 +881,7 @@ async function getTokenBalance({ provider, address, chainInfo, tokenName }) {
     console.log(`[ERC20] ${token} 合约地址: ${erc20Addr}`);
     const contract = new ethers.Contract(erc20Addr, erc20ABI, provider);
     const balance = await contract.balanceOf(address);
-    return parseFloat(ethers.formatEther(balance)).toFixed(6);
+    return parseFloat(ethers.formatUnits(balance, 18)).toFixed(6);
   } catch (err) {
     console.error(`[错误] 查询 ${token} 余额失败:`, err);
     return '0.000000';
@@ -781,49 +931,7 @@ async function initBridgeBalance() {
 const bridgeMethod = async () => {
   console.log("bridgeMethod 被调用", coinChoose.value.name);
 
-  // 1. 验证钱包连接
-  if (!address.value) {
-    ElMessage({
-      message: '请先连接钱包',
-      type: 'warning',
-      duration: 2000,
-      showClose: true
-    })
-    return
-  }
 
-  // 2. 验证金额
-  if (!amount.value || Number(amount.value) <= 0) {
-    ElMessage({
-      message: '请输入有效的桥接金额',
-      type: 'warning',
-      duration: 2000,
-      showClose: true
-    })
-    return
-  }
-
-  // 3. 检查最小桥接金额
-  if (Number(amount.value) < coinChoose.value.minBridgeAmount) {
-    ElMessage({
-      message: `最小桥接金额为 ${coinChoose.value.minBridgeAmount} ${coinChoose.value.name}`,
-      type: 'warning',
-      duration: 2000,
-      showClose: true
-    })
-    return
-  }
-
-  // 4. 检查余额
-  if (Number(fromBalance.value) < Number(amount.value)) {
-    ElMessage({
-      message: '余额不足',
-      type: 'warning',
-      duration: 2000,
-      showClose: true
-    })
-    return
-  }
 
   // 5. 检查并切换网络
   if (chain.value?.id !== fromChain.value.chainId) {
@@ -843,7 +951,7 @@ const bridgeMethod = async () => {
     } catch (error) {
       console.error('网络切换失败:', error)
       ElMessage({
-        message: '请切换到正确的网络',
+        message: UI_MESSAGES.value.switchNetwork,
         type: 'error',
         duration: 2000,
         showClose: true
@@ -882,18 +990,12 @@ const bridgeMethod = async () => {
       },
       setApprovalHash: (hash) => {
         console.log('授权交易哈希:', hash)
-      }
+      },
+      BRIDGE_MESSAGES: BRIDGE_MESSAGES.value
     })
 
     console.log('桥接成功:', result)
-    // 
-    // 9. 桥接成功后处理
-    // ElMessage({
-    //   message: '桥接交易提交成功！',
-    //   type: 'success',
-    //   duration: 3000,
-    //   showClose: true
-    // })
+
 
     // 重置表单
     amount.value = ''
@@ -905,28 +1007,22 @@ const bridgeMethod = async () => {
   } catch (error) {
     console.error('桥接失败:', error)
 
-    let errorMessage = '桥接失败'
+    let errorMessage = BRIDGE_MESSAGES.value.bridgeFailed
     if (error.message.includes('User rejected')) {
-      errorMessage = '用户取消了交易'
+      errorMessage = BRIDGE_MESSAGES.value.userRejected
     } else if (error.message.includes('insufficient funds')) {
-      errorMessage = '余额不足'
+      errorMessage = BRIDGE_MESSAGES.value.insufficientBalance
     } else if (error.message) {
       errorMessage = error.message
     }
 
-    // ElMessage({
-    //   message: errorMessage,
-    //   type: 'error',
-    //   duration: 3000,
-    //   showClose: true
-    // })
+
   } finally {
     isProcessing.value = false
   }
 }
+
 async function getBridgeFees() {
-
-
   isloadingGas.value = true
 
   allusdtFees.value = ""
@@ -935,11 +1031,10 @@ async function getBridgeFees() {
   var symbol = coinChoose.value.name.toLowerCase()
   var result = await getbridgeFees(chainId, symbol)
   allbridgeFees.value = result.data.predict_fee
-  // console.log(allbridgeFees)
-  // this.allusdtFees =
+
   allusdtFees.value = calculateMarketPriceTimesFee(result.data.market_price, result.data.predict_fee)
   isloadingGas.value = false
-  // this.allbridgeFees = result
+
   if (!amount.value) {
     bridgeAmount.value = ""
   } else {
@@ -954,25 +1049,19 @@ async function getBridgeFees() {
       bridgeAmount.value = result2.toFixed(8)
     }
   }
-
 }
 
 async function getRecordsList() {
   if (!address.value) return
   var result = await getBridgeRecords(
-
-
     pageNumber.value,
     pageSize.value,
     "desc",
     address.value
-
-
   )
   records.value = result.data.Records
   Total.value = result.data.Total
   pageNumber.value = result.data.Current
-
 }
 
 function calculateMarketPriceTimesFee(market_price_str, predict_fee_str) {
@@ -983,8 +1072,8 @@ function calculateMarketPriceTimesFee(market_price_str, predict_fee_str) {
 
   return result.toFixed(6);  // 保留 
 }
-function select(val) {
 
+function select(val) {
   selected.value = val;
   handleClose();
   if (val.chainId == fromChain.value.chainId || val.chainId == toChain.value.chainId) {
@@ -994,26 +1083,19 @@ function select(val) {
   }
   if (state.value == 1 && val.chainId != fromChain.value.chainId) {
     fromChain.value = selected.value
-
     initBridgeBalance()
   }
   if (state.value == 2 && val.chainId != toChain.value.chainId) {
     toChain.value = selected.value
     initBridgeBalance()
   }
-
-
-
 }
-
-
 
 function select2(val) {
   console.log(val)
   coinChoose.value = val
   showModal2.value = false
   initBridgeBalance()
-
 }
 </script>
 
@@ -2215,7 +2297,7 @@ function select2(val) {
             transition: box-shadow 0.2s;
 
             img {
-              width: 40px;
+              width: 30px;
               display: block;
             }
 
@@ -2306,10 +2388,10 @@ function select2(val) {
                 outline: none;
                 background: transparent;
                 color: #FFF;
-                width: 100px;
+                width: 100%;
                 // text-align: center;
                 // font-family: "TT Hoves Pro Trial";
-                font-size: 32px;
+                font-size: 20px;
                 font-style: normal;
                 font-weight: 600;
                 line-height: normal;
@@ -2333,7 +2415,7 @@ function select2(val) {
             align-items: flex-end;
             justify-content: space-between;
             height: 100%;
-            min-width: 180px;
+            min-width: 150px;
 
             .token-selector {
               display: flex;
@@ -2427,8 +2509,8 @@ function select2(val) {
             gap: 10px;
 
             .summary-icon {
-              width: 48px;
-              height: 48px;
+              width: 32px;
+              height: 32px;
               border-radius: 50%;
 
               object-fit: cover;
@@ -2442,7 +2524,7 @@ function select2(val) {
               .summary-amt {
                 color: #FFF;
 
-                font-size: 24px;
+                font-size: 16px;
                 font-style: normal;
                 font-weight: 600;
                 line-height: normal;
@@ -2469,7 +2551,7 @@ function select2(val) {
               display: flex;
               color: #8E8E92;
 
-              font-size: 12px;
+              font-size: 11px;
               font-style: normal;
               font-weight: 400;
               line-height: normal;
@@ -2489,7 +2571,7 @@ function select2(val) {
             .summary-time {
               color: #8E8E92;
 
-              font-size: 12px;
+              font-size: 11px;
               font-style: normal;
               font-weight: 400;
               line-height: normal;

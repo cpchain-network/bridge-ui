@@ -4,44 +4,72 @@ export default {
     titel: "链接钱包",
     exit: "断开链接"
   },
-  bridge:{
-    title:"随随时随地轻轻松松跨链",
-    Available:"可用",
-    handlingfee:"手续费",
-    Insufficient:"资金不足",
-    sure1:"跨链",
-   
-    record:{
-      title :"跨链记录",
-      name1:"时间",
-      coin:"代币",
-      send:"发出方",
-      total:"金额",
-      receive:"接收方",
-      sourcehash:"源链哈希",
-      tosourcehash:"目标链哈希",
-      fee:"手续费",
-      state:{
-        name:"状态",
-        error:"失败",
-        success:"成功",
-        opt:"操作",
-        ped:"待办"
+  bridge: {
+    placeholderAmount: "至少 0.1",
+    transferTime: "3~10分钟",
+    userCancelledAuth: "用户取消了授权操作",
+    approveTokenFailed: "代币授权失败：",
+    title: "随随时随地轻轻松松跨链",
+    selIcon:"选择币种",
+    selChain:"选择链",
+    Available: "可用",
+    handlingfee: "手续费",
+    Insufficient: "资金不足",
+    sure1: "跨链",
+    approvalPending: "授权处理中...",
+    approvalConfirmed: "授权已确认",
+    approvalFailed: "授权失败",
+    bridgePending: "跨链处理中...",
+    bridgeConfirmed: "跨链已确认",
+    unknownError: "未知错误",
+    enterValidAmount: "请输入有效金额",
+    historyAdded: "历史记录已添加",
+    approvalSuccess: "授权已确认！",
+    bridgeSuccess: "跨链交易成功！",
+    userRejected: "用户拒绝了请求！",
+    bridgeFailed: "跨链失败！",
+    fundsArrive: "资金到账！",
+    connectWallet: "连接钱包",
+    insufficientBalance: "余额不足",
+    switchToCorrectNetwork: "请切换到正确的网络",
+    minimumBridgeAmount: "最小桥接金额为",
+    networkSwitchFailed: "网络切换失败，当前网络与目标网络不匹配",
+    invalidAmountFormat: "无效的金额格式",
+    amountTooLarge: "金额过大，请输入合理数值",
+    processing: "处理中...",
+    transactionSubmitted: "交易已提交",
+    waitingForConfirmation: "等待确认",
+    record: {
+      title: "跨链记录",
+      name1: "时间",
+      coin: "代币",
+      send: "发出方",
+      total: "金额",
+      receive: "接收方",
+      sourcehash: "源链哈希",
+      tosourcehash: "目标链哈希",
+      fee: "手续费",
+      state: {
+        name: "状态",
+        error: "失败",
+        success: "成功",
+        opt: "操作",
+        ped: "待办"
       },
-      opt:"查看"
+      opt: "查看"
 
     },
-    search:"搜索",
-    sureTitle:"确认信息",
-    from :"从",
-    to:"到",
-    Crosschain:"跨链",
-    get:"获得",
-    cross:"通过",
-    crossName:"原生跨链",
-    time:"转账时间",
-    fee:"费用",
-    continues:"继续"
+    search: "搜索",
+    sureTitle: "确认信息",
+    from: "从",
+    to: "到",
+    Crosschain: "跨链",
+    get: "获得",
+    cross: "通过",
+    crossName: "原生跨链",
+    time: "转账时间",
+    fee: "费用",
+    continues: "继续"
   },
   notice: {
     title: "功能开发中",
@@ -57,7 +85,7 @@ export default {
       menu: {
         name1: 'Mainnet',
         name2: 'Testnet',
-      
+
       }
     },
     meun2: {
@@ -109,8 +137,8 @@ export default {
       Japanese: "日语"
     },
     link: "连接钱包",
-    warining:"检测到浏览器里有多个钱包插件,请保留一个!",
-    add:"请启用该插件!"
+    warining: "检测到浏览器里有多个钱包插件,请保留一个!",
+    add: "请启用该插件!"
 
   },
   blockOne: {
@@ -152,25 +180,25 @@ export default {
     title: "CP Chain路线图",
     blockOne: {
       title: "2025 Q3 - Q4",
-      silde:"基础建设与生态启动",
+      silde: "基础建设与生态启动",
       name1: " 主网正式上线",
       name2: "代币发行与交易支持",
       name3: "启动全球节点计划",
-    
+
       name4: "首批生态扶持计划 "
     },
     blockTwo: {
       title: "2026 Q1 - Q2",
-      silde:"生态扩张与价值捕获",
+      silde: "生态扩张与价值捕获",
       name1: " 生态项目多样性与持续增长",
       name2: "打通CEX手续费通道和回购通道",
       name3: "发布API/SDK，构建开发者生态",
       name4: "启动去中心化治理机制",
 
     },
-    blockThree:{
+    blockThree: {
       title: "2026 Q3 - Future",
-      silde:"全球品牌与破圈应用",
+      silde: "全球品牌与破圈应用",
       // 从网络到市场，释放真实价值
       name1: "接入主流金融及衍生品",
       name2: "加速 CP Chain 实体产业落地应用",
@@ -218,7 +246,7 @@ export default {
     content1: {
       title: "网络",
       name1: "Mainnet",
-      name2:"Testnet"
+      name2: "Testnet"
     },
     content2: {
       title: "生态系统",
@@ -238,7 +266,7 @@ export default {
       name1: "兑换",
       name2: "水龙头",
       name3: "批量转账",
-      
+
       name4: "跨链桥",
       name5: "铸造",
     }
@@ -260,21 +288,21 @@ export default {
     "personal_center": "个人中心",
     "sign_out": "退出"
   },
-  swap :{
-    title:"随时随地，轻松兑换",
-    sell:"出售",
-    buy:"购买",
-    balance:"余额",
-    rateWarn:"滑点后最小可得",
-    rate:"当前汇率",
-    nofund:"余额不足",
-    setSlip:"滑点设置",
-    setSliptitle:"设置交易滑点",
-    selicons:"选择币种",
-    basicons:"常用币种",
-    searchicons:"搜索币种",
-    doswaps:"兑换",
-    prohibitReasons:"输入金额过大，超过池子可兑换额度",
-    sure:"确定"
+  swap: {
+    title: "随时随地，轻松兑换",
+    sell: "出售",
+    buy: "购买",
+    balance: "余额",
+    rateWarn: "滑点后最小可得",
+    rate: "当前汇率",
+    nofund: "余额不足",
+    setSlip: "滑点设置",
+    setSliptitle: "设置交易滑点",
+    selicons: "选择币种",
+    basicons: "常用币种",
+    searchicons: "搜索币种",
+    doswaps: "兑换",
+    prohibitReasons: "输入金额过大，超过池子可兑换额度",
+    sure: "确定"
   }
 };
