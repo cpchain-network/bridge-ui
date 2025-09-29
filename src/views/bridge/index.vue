@@ -812,7 +812,7 @@ function initEthers(url, chainId) {
 }
 
 onMounted(() => {
-  Realtimerefresh()
+ 
 })
 
 onUnmounted(() => {
@@ -926,6 +926,7 @@ async function initBridgeBalance() {
   isLoadingBalance.value = false
   getBridgeFees()
   getRecordsList()
+  Realtimerefresh()
 }
 
 const bridgeMethod = async () => {
